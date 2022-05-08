@@ -1,4 +1,4 @@
-package se.thanh.chess
+package se.thanh.chess.core
 
 opaque type File <: Int = Int
 opaque type Rank <: Int = Int
@@ -29,11 +29,15 @@ object Square:
   extension (s: Square)
     def file: File = File.fromSquare(s)
     def rank: Rank = Rank.fromSquare(s)
+
     // mirror vertically
     def mirror: Square = s ^ 0x38
 
     def combine(o: Square) =
       square(s.file, o.rank)
 
-    def distance(o: Square): Int    = ???
+    def distance(o: Square): Int =
+      Math.max(Math.abs(s.file - o.file),
+        Math.abs(s.rank - o.rank))
+
     def aligned(o: Square): Boolean = ???

@@ -35,9 +35,15 @@ val commonSettings = Seq(
     Libs.munit,
     Libs.scalaCheck,
     Libs.munitScalaCheck
-  )
+  ),
+  resolvers += "jitpack" at "https://jitpack.io",
 )
 
+def full(p: Project) = p % "test->test;compile->compile"
+
+val core = project.settings(commonSettings)
+val bitboard =
+  project.settings(commonSettings, libraryDependencies += Libs.compression).dependsOn(full(core))
 val chess = project.settings(commonSettings)
 
 lazy val root = project

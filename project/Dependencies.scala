@@ -6,7 +6,6 @@ object Deps {
     val cats            = "2.7.0"
     val catsParse       = "0.3.7"
     val organizeImports = "0.6.0"
-
   }
 
   object Libs {
@@ -17,7 +16,7 @@ object Deps {
     val munit           = "org.scalameta"  %% "munit"            % "0.7.29" % Test
     val scalaCheck      = "org.scalacheck" %% "scalacheck"       % "1.16.0" % Test
     val munitScalaCheck = "org.scalameta"  %% "munit-scalacheck" % "0.7.29" % Test
-
+    val compression     = "com.github.lenguyenthanh" % "compression" % "a2b45d4437" % Test
     // scalafix rules
     val organizeImports = "com.github.liancheng" %% "organize-imports" % V.organizeImports
   }

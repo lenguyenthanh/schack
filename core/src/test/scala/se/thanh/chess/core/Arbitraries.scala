@@ -1,4 +1,4 @@
-package se.thanh.chess
+package se.thanh.chess.core
 
 import org.scalacheck.{ Arbitrary, Gen }
 
