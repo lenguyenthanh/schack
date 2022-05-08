@@ -53,4 +53,8 @@ class BitboardTests extends ScalaCheckSuite:
     assertEquals(Bitboard.WHITE_PAWN_ATTACKS.toSeq, CBB.WHITE_PAWN_ATTACKS.toSeq)
     assertEquals(Bitboard.BLACK_PAWN_ATTACKS.toSeq, CBB.BLACK_PAWN_ATTACKS.toSeq)
     assertEquals(Bitboard.ATTACKS.toSeq, CBB.ATTACKS.toSeq)
+    (0 until 64).foreach { i =>
+      assertEquals(Bitboard.RAYS(i).toSeq, CBB.RAYS(i).toSeq)
+      assertEquals(Bitboard.BETWEEN(i).toSeq, CBB.BETWEEN(i).toSeq)
+    }
   }

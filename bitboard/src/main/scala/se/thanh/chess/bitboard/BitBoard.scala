@@ -57,7 +57,6 @@ object Bitboard:
     while
       val attack = slidingAttacks(square, subset, deltas)
       val idx    = ((magic.factor * subset) >>> (64 - shift)).toInt + magic.offset
-      // println(s"$idx")
       ATTACKS(idx) = attack
 
       // Carry-rippler trick for enumerating subsets.
@@ -72,7 +71,8 @@ object Bitboard:
       FILES(i) = 0x0101010101010101L << i
     }
 
-    (0 until 64).foreach { sq =>
+    val squareRange = 0 until 64
+    squareRange.foreach { sq =>
       // println(s"$sq")
       KNIGHT_ATTACKS(sq) = slidingAttacks(sq, Bitboard.ALL, KNIGHT_DELTAS)
       KING_ATTACKS(sq) = slidingAttacks(sq, Bitboard.ALL, KING_DELTAS)
@@ -82,6 +82,17 @@ object Bitboard:
       initMagics(sq, Magic.ROOK(sq), 12, ROOK_DELTAS)
       initMagics(sq, Magic.BISHOP(sq), 9, BISHOP_DELTAS)
     }
+
+    for
+      a <- squareRange
+      b <- squareRange
+      _ = if slidingAttacks(a, 0, ROOK_DELTAS).contains(b) then
+        BETWEEN(a)(b) = slidingAttacks(a, 1L << b, ROOK_DELTAS) & slidingAttacks(b, 1L << a, ROOK_DELTAS)
+        RAYS(a)(b) = (1L << a) | (1L << b) | slidingAttacks(a, 0, ROOK_DELTAS) & slidingAttacks(b, 0, ROOK_DELTAS)
+      else if slidingAttacks(a, 0, BISHOP_DELTAS).contains(b) then
+        BETWEEN(a)(b) = slidingAttacks(a, 1L << b, BISHOP_DELTAS) & slidingAttacks(b, 1L <<a, BISHOP_DELTAS)
+        RAYS(a)(b) = (1L << a) | (1L << b) | slidingAttacks(a, 0, BISHOP_DELTAS) & slidingAttacks(b, 0, BISHOP_DELTAS)
+    yield ()
 
   extension (b: Bitboard)
     def contains(s: Int): Boolean =

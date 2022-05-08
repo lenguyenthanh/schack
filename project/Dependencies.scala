@@ -13,10 +13,10 @@ object Deps {
     val cats      = "org.typelevel" %% "cats-core"  % V.cats
     val catsParse = "org.typelevel" %% "cats-parse" % V.catsParse
 
-    val munit           = "org.scalameta"  %% "munit"            % "0.7.29" % Test
-    val scalaCheck      = "org.scalacheck" %% "scalacheck"       % "1.16.0" % Test
-    val munitScalaCheck = "org.scalameta"  %% "munit-scalacheck" % "0.7.29" % Test
-    val compression     = "com.github.lenguyenthanh" % "compression" % "a2b45d4437" % Test
+    val munit           = "org.scalameta"           %% "munit"            % "0.7.29"     % Test
+    val scalaCheck      = "org.scalacheck"          %% "scalacheck"       % "1.16.0"     % Test
+    val munitScalaCheck = "org.scalameta"           %% "munit-scalacheck" % "0.7.29"     % Test
+    val compression     = "com.github.lenguyenthanh" % "compression"      % "a2b45d4437" % Test
     // scalafix rules
     val organizeImports = "com.github.liancheng" %% "organize-imports" % V.organizeImports
   }

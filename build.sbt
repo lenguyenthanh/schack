@@ -36,7 +36,7 @@ val commonSettings = Seq(
     Libs.scalaCheck,
     Libs.munitScalaCheck
   ),
-  resolvers += "jitpack" at "https://jitpack.io",
+  resolvers += "jitpack" at "https://jitpack.io"
 )
 
 def full(p: Project) = p % "test->test;compile->compile"
