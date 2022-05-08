@@ -27,10 +27,10 @@ case class BBoard(
     // ZobristHash
     def incrementalHash: Int = ???
 
-    def isOccupied(s: Square) = occupied.contains(s)
+    def isOccupied(s: Square): Boolean = occupied.contains(s)
 
-    def us() = byColor(turn)
-    def them() = byColor(turn)
+    def us(): Bitboard = byColor(turn)
+    def them(): Bitboard = byColor(turn)
 
     private def byColor: Color => Bitboard =
         case Color.White => white
@@ -39,7 +39,7 @@ case class BBoard(
 object BBoard:
 
   // start of standard position
-  def standard(): BBoard = BBoard(
+  val STANDARD = BBoard(
     pawns = 0xff00000000ff00L,
     knights = 0x4200000000000042L,
     bishops = 0x2400000000000024L,
@@ -53,3 +53,20 @@ object BBoard:
     epSquare = None,
     castlingRights = 0x8100000000000081L,
   )
+
+  // empty board for testing purpose only
+  val EMPTY = BBoard(
+    pawns = 0L,
+    knights = 0L,
+    bishops = 0L,
+    rooks = 0L,
+    queens = 0L,
+    kings = 0L,
+    white = 0L,
+    black = 0L,
+    occupied = 0L,
+    turn = Color.White,
+    epSquare = None,
+    castlingRights = 0L,
+  )
+

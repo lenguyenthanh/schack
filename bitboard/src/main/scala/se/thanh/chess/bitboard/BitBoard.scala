@@ -97,10 +97,6 @@ object Bitboard:
 
   initialize()
 
-  extension (b: Bitboard)
-    def contains(s: Int): Boolean =
-      (b & (1L << s)) != 0
-
   extension (s: Square)
     def bishopAttacks(occupied: Bitboard): Bitboard =
       val magic = Magic.BISHOP(s)
@@ -123,6 +119,14 @@ object Bitboard:
 
     def knightAttacks: Bitboard =
       KNIGHT_ATTACKS(s)
+
+  extension (b: Bitboard)
+    def contains(s: Int): Boolean =
+      (b & (1L << s)) != 0
+
+    // TODO we're sure that the result is in [0, 63] range
+    // Remove unsafe get
+    def lsb: Square = Square(java.lang.Long.numberOfTrailingZeros(b)).get
 
   private def distance(a: Int, b: Int): Int =
     Math.max(Math.abs(a.file - b.file), Math.abs(a.rank - b.rank))

@@ -36,8 +36,4 @@ object Square:
     def combine(o: Square) =
       square(s.file, o.rank)
 
-    def distance(o: Square): Int =
-      Math.max(Math.abs(s.file - o.file),
-        Math.abs(s.rank - o.rank))
-
     def aligned(o: Square): Boolean = ???
