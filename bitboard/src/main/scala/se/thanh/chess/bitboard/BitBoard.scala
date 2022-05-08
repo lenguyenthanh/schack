@@ -1,6 +1,7 @@
 package se.thanh.chess.bitboard
 
 import se.thanh.chess.core.Square
+import se.thanh.chess.core.Color
 
 type Bitboard = Long
 
@@ -65,7 +66,7 @@ object Bitboard:
       subset != 0
     do ()
 
-  def init() =
+  def initialize() =
     (0 until 8).foreach { i =>
       RANKS(i) = 0xffL << (i * 8)
       FILES(i) = 0x0101010101010101L << i
@@ -94,9 +95,34 @@ object Bitboard:
         RAYS(a)(b) = (1L << a) | (1L << b) | slidingAttacks(a, 0, BISHOP_DELTAS) & slidingAttacks(b, 0, BISHOP_DELTAS)
     yield ()
 
+  initialize()
+
   extension (b: Bitboard)
     def contains(s: Int): Boolean =
       (b & (1L << s)) != 0
+
+  extension (s: Square)
+    def bishopAttacks(occupied: Bitboard): Bitboard =
+      val magic = Magic.BISHOP(s)
+      ATTACKS(((magic.factor * (occupied & magic.mask) >>> (64 - 9)).toInt + magic.offset))
+
+    def rookAttacks(occupied: Bitboard): Bitboard =
+      val magic = Magic.ROOK(s)
+      ATTACKS(((magic.factor * (occupied & magic.mask) >>> (64 - 12)).toInt + magic.offset))
+
+    def queenAttacks(occupied: Bitboard): Bitboard =
+      bishopAttacks(occupied) ^ rookAttacks(occupied)
+
+    def pawnAttacks(color: Color): Bitboard =
+      color match
+        case Color.White => WHITE_PAWN_ATTACKS(s)
+        case Color.Black => BLACK_PAWN_ATTACKS(s)
+
+    def kingAttacks: Bitboard =
+      KING_ATTACKS(s)
+
+    def knightAttacks: Bitboard =
+      KNIGHT_ATTACKS(s)
 
   private def distance(a: Int, b: Int): Int =
     Math.max(Math.abs(a.file - b.file), Math.abs(a.rank - b.rank))

@@ -6,6 +6,7 @@ import se.thanh.chess.core.Square
 import Bitboard.*
 import org.scalacheck.Prop
 import se.thanh.chess.core.Arbitraries.given
+import se.thanh.chess.core.Color
 
 class BitboardTests extends ScalaCheckSuite:
 
@@ -47,8 +48,6 @@ class BitboardTests extends ScalaCheckSuite:
   }
 
   test("init function") {
-    Bitboard.init()
-    assertEquals(Bitboard.KING_ATTACKS.toSeq, CBB.KING_ATTACKS.toSeq)
     assertEquals(Bitboard.KNIGHT_ATTACKS.toSeq, CBB.KNIGHT_ATTACKS.toSeq)
     assertEquals(Bitboard.WHITE_PAWN_ATTACKS.toSeq, CBB.WHITE_PAWN_ATTACKS.toSeq)
     assertEquals(Bitboard.BLACK_PAWN_ATTACKS.toSeq, CBB.BLACK_PAWN_ATTACKS.toSeq)
@@ -56,5 +55,30 @@ class BitboardTests extends ScalaCheckSuite:
     (0 until 64).foreach { i =>
       assertEquals(Bitboard.RAYS(i).toSeq, CBB.RAYS(i).toSeq)
       assertEquals(Bitboard.BETWEEN(i).toSeq, CBB.BETWEEN(i).toSeq)
+    }
+  }
+
+  property("bitshop attacks") {
+    Prop.forAll { (occupied: Long, s: Square) =>
+      s.bishopAttacks(occupied) == CBB.bishopAttacks(s, occupied)
+    }
+  }
+
+  property("rook attacks") {
+    Prop.forAll { (occupied: Long, s: Square) =>
+      s.rookAttacks(occupied) == CBB.rookAttacks(s, occupied)
+    }
+  }
+
+  property("queen attacks") {
+    Prop.forAll { (occupied: Long, s: Square) =>
+      s.queenAttacks(occupied) == CBB.queenAttacks(s, occupied)
+    }
+  }
+
+  property("pawn attacks") {
+    Prop.forAll { (s: Square) =>
+      s.pawnAttacks(Color.White) == CBB.pawnAttacks(true, s)
+      s.pawnAttacks(Color.Black) == CBB.pawnAttacks(false, s)
     }
   }
