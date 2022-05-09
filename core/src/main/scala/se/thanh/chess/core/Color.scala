@@ -1,9 +1,12 @@
 package se.thanh.chess.core
 
-enum Color:
-  case White, Black;
+import scala.annotation.targetName
 
-  def negate: Color =
+enum Color:
+  case White, Black
+
+  @targetName("negate")
+  def unary_! =
     this match
       case White => Black
       case Black => White
