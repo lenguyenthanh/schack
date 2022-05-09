@@ -1,8 +1,13 @@
 package se.thanh.chess.bitboard
 
 import se.thanh.chess.core.Square
+import se.thanh.chess.core.Rank
 import se.thanh.chess.core.Color
 import Bitboard.*
+import se.thanh.chess.core.Role
+import se.thanh.chess.core.Piece
+
+import cats.syntax.all.*
 
 case class BBoard(
     pawns: Bitboard,
@@ -30,7 +35,78 @@ case class BBoard(
     def isOccupied(s: Square): Boolean = occupied.contains(s)
 
     def us(): Bitboard = byColor(turn)
-    def them(): Bitboard = byColor(turn)
+    def them(): Bitboard = byColor(!turn)
+
+    def roleAt(s: Square): Option[Role] =
+      if(pawns.contains(s)) then Some(Role.Pawn)
+      else if(knights.contains(s)) then Some(Role.Knight)
+      else if(bishops.contains(s)) then Some(Role.Bishop)
+      else if(rooks.contains(s)) then Some(Role.Rook)
+      else if(queens.contains(s)) then Some(Role.Queen)
+      else if(kings.contains(s)) then Some(Role.King)
+      else None
+
+    def colorAt(s: Square): Option[Color] =
+      if(white.contains(s)) then Some(Color.White)
+      else if(black.contains(s)) then Some(Color.Black)
+      else None
+
+    def pieceAt(s: Square): Option[Piece] =
+      (roleAt(s), colorAt(s)).mapN(Piece.apply)
+
+    def whiteAt(s: Square): Boolean =
+      colorAt(s).fold(false)(c => c == Color.White)
+
+    def blackAt(s: Square): Boolean =
+      colorAt(s).fold(false)(c => c == Color.Black)
+
+    def king(color: Color): Square =
+      (kings & byColor(color)).lsb
+
+    def ourKing: Square = king(turn)
+
+    // TODO is this useful?
+    def roleByColor(role: Bitboard, color: Color): Bitboard =
+      color match
+        case Color.White => role & white
+        case Color.Black => role & black
+
+    def isWhiteTurn = turn.isWhite
+    def isBlackTurn = !isWhiteTurn
+
+    def attacksTo(s: Square, attacker: Color): Bitboard =
+      byColor(attacker) & (
+        s.rookAttacks(occupied) & (rooks ^ queens) |
+        s.bishopAttacks(occupied) & (bishops ^ queens) |
+        s.knightAttacks & kings |
+        s.pawnAttacks(!attacker) & pawns
+      )
+
+    def isCheck() =
+      attacksTo(king(turn), !turn) != 0
+
+    def seventhRank: Rank = turn match
+                        case Color.White => Rank.seven
+                        case Color.Black => Rank.two
+    /** Find all blockers between the king an sliders
+      * First we find all snipers (all potential sliders which can attack the king)
+      * Then we loop over those snipers if there is no only one blockers between
+      * the king and the sniper we add them into the blockers list
+      */
+    def sliderBlockers(king: Square): Bitboard =
+      var snipers = them() & (
+          king.rookAttacks(0L) & (rooks ^ queens) |
+          king.bishopAttacks(0L) & (bishops ^ queens)
+        )
+      var blockers = 0L
+      while
+        snipers != 0
+      do
+        val sniper = snipers.lsb
+        val between = Bitboard.between(king, sniper) & occupied
+        if(!between.moreThanOne) blockers |= between
+        snipers &= snipers - 1L
+      blockers
 
     private def byColor: Color => Bitboard =
         case Color.White => white

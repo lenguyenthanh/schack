@@ -39,11 +39,7 @@ object Bitboard:
       var i       = 0
       while
         i += 1
-        // println(s"while $sq ${attacks.toHexString}")
         sq += delta
-
-        // println(s"data $sq -> ${distance(sq, sq -delta)} -> ${occupied.contains(sq)}")
-
         val con = (sq < 0 || 64 <= sq || distance(sq, sq - delta) > 2)
         if (!con)
           attacks |= 1L << sq
@@ -97,6 +93,9 @@ object Bitboard:
 
   initialize()
 
+  def between(a: Square, b: Square): Bitboard =
+    BETWEEN(a)(b)
+
   extension (s: Square)
     def bishopAttacks(occupied: Bitboard): Bitboard =
       val magic = Magic.BISHOP(s)
@@ -123,6 +122,9 @@ object Bitboard:
   extension (b: Bitboard)
     def contains(s: Int): Boolean =
       (b & (1L << s)) != 0
+
+    def moreThanOne: Boolean =
+      (b & (b - 1L)) != 0
 
     // TODO we're sure that the result is in [0, 63] range
     // Remove unsafe get

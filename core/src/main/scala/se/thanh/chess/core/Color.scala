@@ -10,3 +10,10 @@ enum Color:
     this match
       case White => Black
       case Black => White
+
+  def isWhite =
+    this match
+      case White => true
+      case Black => false
+
+  def isBlack = !isWhite

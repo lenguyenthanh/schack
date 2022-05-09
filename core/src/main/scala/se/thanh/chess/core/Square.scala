@@ -12,11 +12,31 @@ object File:
 
   def fromSquare(s: Square): File = s & 7
 
+  val a: File = 0
+  val b: File = 1
+  val c: File = 2
+  val d: File = 3
+  val e: File = 4
+  val f: File = 5
+  val g: File = 6
+  val h: File = 7
+
+
 object Rank:
   def apply(i: Int): Option[Rank] =
     if (i >= 0 && i < 8) Some(i)
     else None
+
   def fromSquare(s: Square): Rank = s >>> 3
+
+  val one: Rank = 0
+  val two: Rank = 1
+  val three: Rank = 2
+  val four: Rank = 3
+  val five: Rank = 4
+  val six: Rank = 5
+  val seven: Rank = 6
+  val eight: Rank = 7
 
 object Square:
   def apply(i: Int): Option[Square] =
