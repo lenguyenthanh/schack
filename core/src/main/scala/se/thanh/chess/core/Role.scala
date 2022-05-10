@@ -7,4 +7,3 @@ enum Role:
   case Rook
   case Queen
   case King
-

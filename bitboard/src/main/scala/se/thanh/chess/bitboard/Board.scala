@@ -28,7 +28,6 @@ case class BBoard(
     // 1 in position of a rook means castling right
     // maybe we don't need a long for this
     castlingRights: Bitboard,
-
     // The halfmove clock specifies a decimal number of half moves with respect
     // to the 50 move draw rule. It is reset to zero after a capture or a pawn
     // move and incremented otherwise.
@@ -36,6 +35,7 @@ case class BBoard(
     // The number of the full moves in a game. It starts at 1,
     // and is incremented after each Black's move.
     fullMoves: Int,
+
 ):
 
     // ZobristHash
@@ -95,8 +95,8 @@ case class BBoard(
       king(turn).fold(false)(k => attacksTo(k, !turn) != 0)
 
     def seventhRank: Rank = turn match
-                        case Color.White => Rank.seven
-                        case Color.Black => Rank.two
+                        case Color.White => Rank.seventh
+                        case Color.Black => Rank.second
 
     /** Find all blockers between the king an sliders
       * First we find all snipers (all potential sliders which can attack the king)

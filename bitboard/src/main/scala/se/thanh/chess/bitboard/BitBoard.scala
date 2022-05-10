@@ -10,6 +10,7 @@ type Bitboard = Long
 object Bitboard:
 
   val ALL   = -1L
+  val corners = 0x8100000000000081L
 
   val RANKS = Array.fill(8)(0L)
   val FILES = Array.fill(8)(0L)

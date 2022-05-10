@@ -1,5 +1,7 @@
 package se.thanh.chess.core
 
+import cats.syntax.all.*
+
 opaque type File <: Int = Int
 opaque type Rank <: Int = Int
 
@@ -10,7 +12,11 @@ object File:
     if (i >= 0 && i < 8) Some(i)
     else None
 
+  def apply(c: Char): Option[File] =
+    apply(c - 'a')
+
   def fromSquare(s: Square): File = s & 7
+
 
   val a: File = 0
   val b: File = 1
@@ -27,16 +33,19 @@ object Rank:
     if (i >= 0 && i < 8) Some(i)
     else None
 
+  def apply(c: Char): Option[File] =
+    apply(c - '1')
+
   def fromSquare(s: Square): Rank = s >>> 3
 
-  val one: Rank = 0
-  val two: Rank = 1
-  val three: Rank = 2
-  val four: Rank = 3
-  val five: Rank = 4
-  val six: Rank = 5
-  val seven: Rank = 6
-  val eight: Rank = 7
+  val first: Rank = 0
+  val second: Rank = 1
+  val third: Rank = 2
+  val fourth: Rank = 3
+  val fifth: Rank = 4
+  val sixth: Rank = 5
+  val seventh: Rank = 6
+  val eighth: Rank = 7
 
 object Square:
   def apply(i: Int): Option[Square] =
@@ -45,6 +54,11 @@ object Square:
 
   def square(file: File, rank: Rank): Square =
     file ^ (rank << 3)
+
+  def fromString(s: String): Option[Square] =
+    s.toList match
+      case x::y::Nil => (File(x), Rank(y)).mapN(square)
+      case _ => None
 
   extension (s: Square)
     def file: File = File.fromSquare(s)
