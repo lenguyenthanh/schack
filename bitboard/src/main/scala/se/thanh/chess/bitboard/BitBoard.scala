@@ -3,6 +3,8 @@ package se.thanh.chess.bitboard
 import se.thanh.chess.core.Square
 import se.thanh.chess.core.Color
 
+import scala.collection.mutable.ListBuffer
+
 type Bitboard = Long
 
 object Bitboard:
@@ -126,9 +128,17 @@ object Bitboard:
     def moreThanOne: Boolean =
       (b & (b - 1L)) != 0
 
-    // TODO we're sure that the result is in [0, 63] range
-    // Remove unsafe get
-    def lsb: Square = Square(java.lang.Long.numberOfTrailingZeros(b)).get
+    def lsb: Option[Square] = Square(java.lang.Long.numberOfTrailingZeros(b))
+
+    def occupiedSquares: List[Square] =
+      var bb = b
+      val sx = ListBuffer[Square]()
+      while
+        bb != 0
+      do
+        sx.addOne(bb.lsb.get)
+        bb &= (bb - 1L)
+      sx.toList
 
   private def distance(a: Int, b: Int): Int =
     Math.max(Math.abs(a.file - b.file), Math.abs(a.rank - b.rank))

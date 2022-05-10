@@ -15,7 +15,8 @@ object StandardMovesGenerator:
   extension (b: BBoard)
     def generate: List[Move] =
       val enPassantMoves = b.epSquare.fold(List())(genEnPassant)
-      val king = b.ourKing
+      // todo fix
+      val king = b.ourKing.get
       val checkers = b.attacksTo(king, !b.turn)
       val moves = if checkers == 0 then
         val targets = ~b.us()
@@ -30,8 +31,7 @@ object StandardMovesGenerator:
     def genEnPassant(ep: Square): List[Move] =
       val pawns = b.us() & b.pawns & ep.pawnAttacks(!b.turn)
       val f: Bitboard => Option[(Square, Bitboard)] = bb =>
-        val newPawns = bb & (bb - 1L)
-        Option.when(bb != 0)((bb.lsb, newPawns))
+        bb.lsb.map(s => (s, bb & (bb - 1L)))
       List.unfold(pawns)(f).map(s => Move.EnPassant(s, ep))
 
 
@@ -53,37 +53,32 @@ object StandardMovesGenerator:
       var moves = ListBuffer[Move]()
 
       // pawn captures
-      var captures = b.us() & b.pawns
-      while
-        captures != 0
-      do
-        val from = captures.lsb
-        var targets = from.pawnAttacks(b.turn) & b.them() & mask
-        while
-          targets != 0
-        do
-          val to = targets.lsb
-          moves.addAll(genPawnMoves(from, to, true))
-          targets &= (targets - 1L)
+      var capturers = b.us() & b.pawns
+
+      capturers.lsb.fold(List()){ from =>
+        val targets = from.pawnAttacks(b.turn) & b.them() & mask
+      }
+
+      val s1: List[List[Move]] = for
+        from <- capturers.occupiedSquares
+        targets = from.pawnAttacks(b.turn) & b.them() & mask
+        to <- targets.occupiedSquares
+      yield genPawnMoves(from, to, true)
 
       // normal pawn moves
       var singleMoves = ~b.occupied & (if b.isWhiteTurn then ((b.white & b.pawns) << 8) else ((b.black & b.pawns) >>> 8))
       var doubleMoves = ~b.occupied & (if b.isWhiteTurn then (singleMoves << 8) else (singleMoves >>> 8))
                           & Bitboard.RANKS(if b.isWhiteTurn then 3 else 4)
 
-      while
-        singleMoves != 0
-      do
-        val to = singleMoves.lsb
-        val from = Square(to + (if b.turn.isWhite then -8 else 8)).get
-        moves.addAll(genPawnMoves(from, to, false))
+      val s2: List[List[Move]] = for
+        to <- singleMoves.occupiedSquares
+        from = Square(to + (if b.turn.isWhite then -8 else 8)).get
+      yield genPawnMoves(from, to, false)
 
-      while
-        doubleMoves != 0
-      do
-        val to = doubleMoves.lsb
-        val from = Square(to + (if b.turn.isWhite then -8 else 8)).get
-        moves.addOne(Move.Normal(Role.Pawn, from, to, false))
+      val s3: List[Move] = for
+        to <- doubleMoves.occupiedSquares
+        from = Square(to + (if b.turn.isWhite then -8 else 8)).get
+      yield Move.Normal(Role.Pawn, from, to, false)
 
       moves.toList
 

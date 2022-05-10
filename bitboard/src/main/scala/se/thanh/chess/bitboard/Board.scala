@@ -25,8 +25,17 @@ case class BBoard(
     turn: Color,
     // possible en-passant square
     epSquare: Option[Square],
-    // ???
+    // 1 in position of a rook means castling right
+    // maybe we don't need a long for this
     castlingRights: Bitboard,
+
+    // The halfmove clock specifies a decimal number of half moves with respect
+    // to the 50 move draw rule. It is reset to zero after a capture or a pawn
+    // move and incremented otherwise.
+    halftMoves: Int,
+    // The number of the full moves in a game. It starts at 1,
+    // and is incremented after each Black's move.
+    fullMoves: Int,
 ):
 
     // ZobristHash
@@ -60,10 +69,10 @@ case class BBoard(
     def blackAt(s: Square): Boolean =
       colorAt(s).fold(false)(c => c == Color.Black)
 
-    def king(color: Color): Square =
+    def king(color: Color): Option[Square] =
       (kings & byColor(color)).lsb
 
-    def ourKing: Square = king(turn)
+    def ourKing: Option[Square] = king(turn)
 
     // TODO is this useful?
     def roleByColor(role: Bitboard, color: Color): Bitboard =
@@ -82,12 +91,13 @@ case class BBoard(
         s.pawnAttacks(!attacker) & pawns
       )
 
-    def isCheck() =
-      attacksTo(king(turn), !turn) != 0
+    def isCheck(): Boolean =
+      king(turn).fold(false)(k => attacksTo(k, !turn) != 0)
 
     def seventhRank: Rank = turn match
                         case Color.White => Rank.seven
                         case Color.Black => Rank.two
+
     /** Find all blockers between the king an sliders
       * First we find all snipers (all potential sliders which can attack the king)
       * Then we loop over those snipers if there is no only one blockers between
@@ -99,14 +109,14 @@ case class BBoard(
           king.bishopAttacks(0L) & (bishops ^ queens)
         )
       var blockers = 0L
-      while
-        snipers != 0
-      do
-        val sniper = snipers.lsb
-        val between = Bitboard.between(king, sniper) & occupied
-        if(!between.moreThanOne) blockers |= between
-        snipers &= snipers - 1L
-      blockers
+
+      val bs = for
+        sniper <- snipers.occupiedSquares
+        between = Bitboard.between(king, sniper) & occupied
+        if !between.moreThanOne
+      yield between
+
+      bs.fold(0L)((a, b) => a | b)
 
     private def byColor: Color => Bitboard =
         case Color.White => white
@@ -128,6 +138,8 @@ object BBoard:
     turn = Color.White,
     epSquare = None,
     castlingRights = 0x8100000000000081L,
+    halftMoves = 0,
+    fullMoves = 0,
   )
 
   // empty board for testing purpose only
@@ -144,5 +156,7 @@ object BBoard:
     turn = Color.White,
     epSquare = None,
     castlingRights = 0L,
+    halftMoves = 0,
+    fullMoves = 0,
   )
 
