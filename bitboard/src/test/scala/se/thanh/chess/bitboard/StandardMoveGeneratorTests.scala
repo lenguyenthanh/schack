@@ -23,7 +23,7 @@ class StandardMovesGeneratorTests extends FunSuite:
 
   test("genPawn for standard position") {
     val fen           = Fen.standard
-    val targets       = ~fen.us()
+    val targets       = ~fen.us
     val moves         = fen.genPawn(targets)
     val moveList      = MoveList()
     val expectedMoves = fen.cBoard.genPawn(targets, moveList)
@@ -33,11 +33,54 @@ class StandardMovesGeneratorTests extends FunSuite:
   test("genPawn with fenFixtures") {
     FenFixtures.fens.foreach { str =>
       val fen           = Fen.parse(str).getOrElse(throw RuntimeException("boooo"))
-      val targets       = ~fen.us()
+      val targets       = ~fen.us
       val moves         = fen.genPawn(targets)
-      println(moves)
       val moveList      = MoveList()
       val expectedMoves = fen.cBoard.genPawn(targets, moveList)
+      assertEquals(moves.length, moveList.size)
+    }
+  }
+
+  test("genKnight with fenFixtures") {
+    FenFixtures.fens.foreach { str =>
+      val fen           = Fen.parse(str).getOrElse(throw RuntimeException("boooo"))
+      val targets       = ~fen.us
+      val moves         = fen.genKnight(targets)
+      val moveList      = MoveList()
+      val expectedMoves = fen.cBoard.genKnight(targets, moveList)
+      assertEquals(moves.length, moveList.size)
+    }
+  }
+
+  test("genBishop with fenFixtures") {
+    FenFixtures.fens.foreach { str =>
+      val fen           = Fen.parse(str).getOrElse(throw RuntimeException("boooo"))
+      val targets       = ~fen.us
+      val moves         = fen.genBishop(targets)
+      val moveList      = MoveList()
+      val expectedMoves = fen.cBoard.genBishop(targets, moveList)
+      assertEquals(moves.length, moveList.size)
+    }
+  }
+
+  test("genRook with fenFixtures") {
+    FenFixtures.fens.foreach { str =>
+      val fen           = Fen.parse(str).getOrElse(throw RuntimeException("boooo"))
+      val targets       = ~fen.us
+      val moves         = fen.genRook(targets)
+      val moveList      = MoveList()
+      val expectedMoves = fen.cBoard.genRook(targets, moveList)
+      assertEquals(moves.length, moveList.size)
+    }
+  }
+
+  test("genQueen with fenFixtures") {
+    FenFixtures.fens.foreach { str =>
+      val fen           = Fen.parse(str).getOrElse(throw RuntimeException("boooo"))
+      val targets       = ~fen.us
+      val moves         = fen.genQueen(targets)
+      val moveList      = MoveList()
+      val expectedMoves = fen.cBoard.genQueens(targets, moveList)
       assertEquals(moves.length, moveList.size)
     }
   }

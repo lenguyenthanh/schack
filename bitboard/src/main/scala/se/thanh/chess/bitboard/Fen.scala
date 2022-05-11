@@ -13,12 +13,13 @@ import Bitboard.*
 import cats.syntax.all.*
 
 case class Fen(board: Board, state: State):
-    def us(): Bitboard = board.byColor(state.turn)
-    def them(): Bitboard = board.byColor(!state.turn)
+    def us: Bitboard = board.byColor(state.turn)
+    def them: Bitboard = board.byColor(!state.turn)
     def ourKing = board.king(state.turn)
     def checkers = ourKing.map(k => board.attacksTo(k, !state.turn))
     def sliderBlockers = board.sliderBlockers(state.turn)
     def isWhiteTurn = state.turn.isWhite
+    def isOccupied = board.isOccupied
 
 enum ParseFenError:
   case InvalidFenFormat
