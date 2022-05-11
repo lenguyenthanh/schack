@@ -34,6 +34,8 @@ enum ParseFenError:
   */
 object Fen:
 
+  val standard = Fen(Board.standard, State.start)
+
   def parse(fen: String): Either[ParseFenError, Fen] =
     val parts = fen.split(' ').filter(s => !s.isEmpty)
     if parts.size != 6 then Left(ParseFenError.InvalidFenFormat)
@@ -54,10 +56,12 @@ object Fen:
       case _   => Left(ParseFenError.InvalidColor)
 
   def parseCastlingRights(s: String): Either[ParseFenError, Bitboard] =
-    s.toList
-      .traverse(charToSquare)
-      .map(ls => ls.foldRight(0L)((s, b) => (1L << s) | b))
-      .toRight(ParseFenError.InvalidCastling)
+    s match
+      case "-" => Right(0L)
+      case _ => s.toList
+        .traverse(charToSquare)
+        .map(ls => ls.foldRight(0L)((s, b) => (1L << s) | b))
+        .toRight(ParseFenError.InvalidCastling)
 
   def parseEpPassantSquare(s: String): Either[ParseFenError, Option[Square]] =
     val epSquares = for

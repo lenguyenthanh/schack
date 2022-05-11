@@ -35,7 +35,6 @@ object StandardMovesGenerator:
         bb.lsb.map(s => (s, bb & (bb - 1L)))
       List.unfold(pawns)(ff).map(s => Move.EnPassant(s, ep))
 
-
     def genNonKing(mask: Bitboard): List[Move] = ???
     def genSafeKing(king: Square, mask: Bitboard): List[Move] = ???
     def genCastling(king: Square): List[Move] = ???
@@ -77,10 +76,10 @@ object StandardMovesGenerator:
         from = Square(to + (if f.isWhiteTurn then -8 else 8)).get
       yield Move.Normal(Role.Pawn, from, to, false)
 
-      moves.toList
+      s1.flatten ++ s2.flatten ++ s3
 
     def genPawnMoves(from: Square, to: Square, capture: Boolean): List[Move] =
-      if from == f.board.seventhRank(f.state.turn) then
+      if from.rank == f.board.seventhRank(f.state.turn) then
         List(Role.Queen, Role.Knight, Role.Rook, Role.Bishop).map(r => Move.Promotion(from, to, r, capture))
       else
         List(Move.Normal(Role.Pawn, from, to, capture))

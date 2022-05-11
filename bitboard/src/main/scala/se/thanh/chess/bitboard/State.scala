@@ -20,7 +20,6 @@ case class State(
     // possible en-passant square
     epSquare: Option[Square],
     // 1 in position of a rook means castling right
-    // maybe we don't need a long for this
     castlingRights: Bitboard,
     // The halfmove clock specifies a decimal number of half moves with respect
     // to the 50 move draw rule. It is reset to zero after a capture or a pawn
@@ -30,3 +29,6 @@ case class State(
     // and is incremented after each Black's move.
     fullMoves: Int
 )
+
+object State:
+  val start = State(Color.White, None, Bitboard.corners, 0, 1)
