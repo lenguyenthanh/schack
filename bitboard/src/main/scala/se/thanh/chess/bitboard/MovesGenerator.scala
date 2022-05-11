@@ -12,27 +12,28 @@ import scala.collection.mutable.ListBuffer
   * Now I just want to finish standard variant first
   */
 object StandardMovesGenerator:
-  extension (b: BBoard)
+  extension (f: Fen)
+    // todo this function should return Either[InvalidPosition, List[Move]]
     def generate: List[Move] =
-      val enPassantMoves = b.epSquare.fold(List())(genEnPassant)
+      val enPassantMoves = f.state.epSquare.fold(List())(genEnPassant)
       // todo fix
-      val king = b.ourKing.get
-      val checkers = b.attacksTo(king, !b.turn)
+      val king = f.ourKing.get
+      val checkers = f.checkers.get
       val moves = if checkers == 0 then
-        val targets = ~b.us()
+        val targets = ~f.us()
         genNonKing(targets) ++ genSafeKing(king, targets) ++ genCastling(king)
       else genEvasions(king, checkers)
-      val blockers = b.sliderBlockers(king)
+      val blockers = f.sliderBlockers
       // if (blockers != 0 || this.epSquare != 0) {
       //   moves.retain(m -> isSafe(king, m, blockers));
       // }
       List()
 
     def genEnPassant(ep: Square): List[Move] =
-      val pawns = b.us() & b.pawns & ep.pawnAttacks(!b.turn)
-      val f: Bitboard => Option[(Square, Bitboard)] = bb =>
+      val pawns = f.us() & f.board.pawns & ep.pawnAttacks(!f.state.turn)
+      val ff: Bitboard => Option[(Square, Bitboard)] = bb =>
         bb.lsb.map(s => (s, bb & (bb - 1L)))
-      List.unfold(pawns)(f).map(s => Move.EnPassant(s, ep))
+      List.unfold(pawns)(ff).map(s => Move.EnPassant(s, ep))
 
 
     def genNonKing(mask: Bitboard): List[Move] = ???
@@ -53,37 +54,33 @@ object StandardMovesGenerator:
       var moves = ListBuffer[Move]()
 
       // pawn captures
-      var capturers = b.us() & b.pawns
-
-      capturers.lsb.fold(List()){ from =>
-        val targets = from.pawnAttacks(b.turn) & b.them() & mask
-      }
+      var capturers = f.us() & f.board.pawns
 
       val s1: List[List[Move]] = for
         from <- capturers.occupiedSquares
-        targets = from.pawnAttacks(b.turn) & b.them() & mask
+        targets = from.pawnAttacks(f.state.turn) & f.them() & mask
         to <- targets.occupiedSquares
       yield genPawnMoves(from, to, true)
 
       // normal pawn moves
-      var singleMoves = ~b.occupied & (if b.isWhiteTurn then ((b.white & b.pawns) << 8) else ((b.black & b.pawns) >>> 8))
-      var doubleMoves = ~b.occupied & (if b.isWhiteTurn then (singleMoves << 8) else (singleMoves >>> 8))
-                          & Bitboard.RANKS(if b.isWhiteTurn then 3 else 4)
+      val singleMoves = ~f.board.occupied & (if f.isWhiteTurn then ((f.board.white & f.board.pawns) << 8) else ((f.board.black & f.board.pawns) >>> 8))
+      val doubleMoves = ~f.board.occupied & (if f.isWhiteTurn then (singleMoves << 8) else (singleMoves >>> 8))
+                          & Bitboard.RANKS(if f.isWhiteTurn then 3 else 4)
 
       val s2: List[List[Move]] = for
         to <- singleMoves.occupiedSquares
-        from = Square(to + (if b.turn.isWhite then -8 else 8)).get
+        from = Square(to + (if f.isWhiteTurn then -8 else 8)).get
       yield genPawnMoves(from, to, false)
 
       val s3: List[Move] = for
         to <- doubleMoves.occupiedSquares
-        from = Square(to + (if b.turn.isWhite then -8 else 8)).get
+        from = Square(to + (if f.isWhiteTurn then -8 else 8)).get
       yield Move.Normal(Role.Pawn, from, to, false)
 
       moves.toList
 
     def genPawnMoves(from: Square, to: Square, capture: Boolean): List[Move] =
-      if to == b.seventhRank then
+      if from == f.board.seventhRank(f.state.turn) then
         List(Role.Queen, Role.Knight, Role.Rook, Role.Bishop).map(r => Move.Promotion(from, to, r, capture))
       else
         List(Move.Normal(Role.Pawn, from, to, capture))
