@@ -68,7 +68,7 @@ object Fen:
     val epSquares = for
       f <- 'a' to 'h'
       r <- List('3', '6')
-    yield List(f, r).mkString
+    yield s"$f$r"
     s match
       case ep if epSquares contains ep => Right(Square.fromString(ep))
       case "-"                         => Right(None)

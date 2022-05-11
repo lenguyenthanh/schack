@@ -48,7 +48,7 @@ object StandardMovesGenerator:
         from <- knights.occupiedSquares
         targets = Bitboard.knightAttacks(from) & mask
         to <- targets.occupiedSquares
-      yield Move.Normal(Role.Knight, from, to, f.isOccupied(to))
+      yield Move.Normal(from, to, Role.Knight, f.isOccupied(to))
 
     def genBishop(mask: Bitboard): List[Move] =
       val bishops = f.us & f.board.bishops
@@ -56,7 +56,7 @@ object StandardMovesGenerator:
         from <- bishops.occupiedSquares
         targets = from.bishopAttacks(f.board.occupied) & mask
         to <- targets.occupiedSquares
-      yield Move.Normal(Role.Bishop, from, to, f.isOccupied(to))
+      yield Move.Normal(from, to, Role.Bishop, f.isOccupied(to))
 
     def genRook(mask: Bitboard): List[Move] =
       val rooks = f.us & f.board.rooks
@@ -64,7 +64,7 @@ object StandardMovesGenerator:
         from <- rooks.occupiedSquares
         targets = from.rookAttacks(f.board.occupied) & mask
         to <- targets.occupiedSquares
-      yield Move.Normal(Role.Rook, from, to, f.isOccupied(to))
+      yield Move.Normal(from, to, Role.Rook, f.isOccupied(to))
 
     def genQueen(mask: Bitboard): List[Move] =
       val queens = f.us & f.board.queens
@@ -72,7 +72,7 @@ object StandardMovesGenerator:
         from <- queens.occupiedSquares
         targets = from.queenAttacks(f.board.occupied) & mask
         to <- targets.occupiedSquares
-      yield Move.Normal(Role.Queen, from, to, f.isOccupied(to))
+      yield Move.Normal(from, to, Role.Queen, f.isOccupied(to))
 
     /** Generate all pawn moves except en passant
       * This includes
@@ -84,10 +84,10 @@ object StandardMovesGenerator:
       * because enemy cannot be captured by law
       */
     def genPawn(mask: Bitboard): List[Move] =
-      var moves = ListBuffer[Move]()
+      val moves = ListBuffer[Move]()
 
       // pawn captures
-      var capturers = f.us & f.board.pawns
+      val capturers = f.us & f.board.pawns
 
       val s1: List[List[Move]] = for
         from <- capturers.occupiedSquares
@@ -107,8 +107,8 @@ object StandardMovesGenerator:
 
       val s3: List[Move] = for
         to <- doubleMoves.occupiedSquares
-        from = Square(to + (if f.isWhiteTurn then -8 else 8)).get
-      yield Move.Normal(Role.Pawn, from, to, false)
+        from = Square(to + (if f.isWhiteTurn then -16 else 16)).get
+      yield Move.Normal(from, to, Role.Pawn, false)
 
       s1.flatten ++ s2.flatten ++ s3
 
@@ -116,4 +116,4 @@ object StandardMovesGenerator:
       if from.rank == f.board.seventhRank(f.state.turn) then
         List(Role.Queen, Role.Knight, Role.Rook, Role.Bishop).map(r => Move.Promotion(from, to, r, capture))
       else
-        List(Move.Normal(Role.Pawn, from, to, capture))
+        List(Move.Normal(from, to, Role.Pawn, capture))

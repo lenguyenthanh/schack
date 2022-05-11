@@ -7,3 +7,12 @@ enum Role:
   case Rook
   case Queen
   case King
+
+  def symbol: Char =
+    this match
+      case Pawn => 'p'
+      case Knight => 'n'
+      case Bishop => 'b'
+      case Rook => 'r'
+      case Queen => 'q'
+      case King => 'k'

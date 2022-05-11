@@ -27,7 +27,7 @@ class StandardMovesGeneratorTests extends FunSuite:
     val moves         = fen.genPawn(targets)
     val moveList      = MoveList()
     val expectedMoves = fen.cBoard.genPawn(targets, moveList)
-    assertEquals(moves.length, moveList.size)
+    assertMoves(moves, moveList)
   }
 
   test("genPawn with fenFixtures") {
@@ -37,7 +37,7 @@ class StandardMovesGeneratorTests extends FunSuite:
       val moves         = fen.genPawn(targets)
       val moveList      = MoveList()
       val expectedMoves = fen.cBoard.genPawn(targets, moveList)
-      assertEquals(moves.length, moveList.size)
+      assertMoves(moves, moveList)
     }
   }
 
@@ -48,7 +48,7 @@ class StandardMovesGeneratorTests extends FunSuite:
       val moves         = fen.genKnight(targets)
       val moveList      = MoveList()
       val expectedMoves = fen.cBoard.genKnight(targets, moveList)
-      assertEquals(moves.length, moveList.size)
+      assertMoves(moves, moveList)
     }
   }
 
@@ -59,7 +59,7 @@ class StandardMovesGeneratorTests extends FunSuite:
       val moves         = fen.genBishop(targets)
       val moveList      = MoveList()
       val expectedMoves = fen.cBoard.genBishop(targets, moveList)
-      assertEquals(moves.length, moveList.size)
+      assertMoves(moves, moveList)
     }
   }
 
@@ -70,7 +70,7 @@ class StandardMovesGeneratorTests extends FunSuite:
       val moves         = fen.genRook(targets)
       val moveList      = MoveList()
       val expectedMoves = fen.cBoard.genRook(targets, moveList)
-      assertEquals(moves.length, moveList.size)
+      assertMoves(moves, moveList)
     }
   }
 
@@ -81,6 +81,13 @@ class StandardMovesGeneratorTests extends FunSuite:
       val moves         = fen.genQueen(targets)
       val moveList      = MoveList()
       val expectedMoves = fen.cBoard.genQueens(targets, moveList)
-      assertEquals(moves.length, moveList.size)
+      assertMoves(moves, moveList)
     }
   }
+
+  private def assertMoves(moves: List[Move], moveList: MoveList) =
+    assertEquals(moves.length, moveList.size)
+    println(moves.toSet)
+    println(moves.map(m => m.uci).toSet)
+    assertEquals(moves.map(m => m.uci).toSet, moveList.uciSet)
+

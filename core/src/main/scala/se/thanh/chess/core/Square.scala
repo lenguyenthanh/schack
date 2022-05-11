@@ -17,6 +17,8 @@ object File:
 
   def fromSquare(s: Square): File = s & 7
 
+  extension (f: File)
+    def char: Char = ('a' + f).toChar
 
   val a: File = 0
   val b: File = 1
@@ -26,7 +28,6 @@ object File:
   val f: File = 5
   val g: File = 6
   val h: File = 7
-
 
 object Rank:
   def apply(i: Int): Option[Rank] =
@@ -38,6 +39,8 @@ object Rank:
 
   def fromSquare(s: Square): Rank = s >>> 3
 
+  def char(r: Rank): Char = ('1' + r).toChar
+
   val first: Rank = 0
   val second: Rank = 1
   val third: Rank = 2
@@ -48,6 +51,9 @@ object Rank:
   val eighth: Rank = 7
 
 object Square:
+
+  import File.*
+
   def apply(i: Int): Option[Square] =
     if (i >= 0 && i < 64) Some(i)
     else None
@@ -63,6 +69,11 @@ object Square:
   extension (s: Square)
     def file: File = File.fromSquare(s)
     def rank: Rank = Rank.fromSquare(s)
+
+    def uci: String =
+      val f = s.file.char
+      val r = Rank.char(s.rank)
+      s"$f$r"
 
     // mirror vertically
     def mirror: Square = s ^ 0x38
