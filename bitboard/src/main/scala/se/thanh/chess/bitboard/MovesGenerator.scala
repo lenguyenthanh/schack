@@ -17,6 +17,7 @@ object StandardMovesGenerator:
     def generate: List[Move] =
       val enPassantMoves = f.state.epSquare.fold(List())(genEnPassant)
       // todo fix
+      // if no king returns Left
       val king = f.ourKing.get
       val checkers = f.checkers.get
       val moves = if checkers == 0 then
@@ -38,7 +39,14 @@ object StandardMovesGenerator:
     def genNonKing(mask: Bitboard): List[Move] =
       genPawn(mask) ++ genKnight(mask) ++ genBishop(mask) ++ genRook(mask) ++ genQueen(mask)
 
-    def genSafeKing(king: Square, mask: Bitboard): List[Move] = ???
+    // this can still generate unsafe king moves
+    def genSafeKing(king: Square, mask: Bitboard): List[Move] =
+      val targets = king.kingAttacks & mask
+      for
+        to <- targets.occupiedSquares
+        if f.board.attacksTo(to, !f.state.turn) == 0
+      yield Move.Normal(king, to, Role.King, f.isOccupied(to))
+
     def genCastling(king: Square): List[Move] = ???
     def genEvasions(king: Square, checkers: Bitboard): List[Move] = ???
 
