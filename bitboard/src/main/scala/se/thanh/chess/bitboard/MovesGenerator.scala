@@ -23,12 +23,14 @@ object StandardMovesGenerator:
       val moves = if checkers == 0 then
         val targets = ~f.us
         genNonKing(targets) ++ genSafeKing(king, targets) ++ genCastling(king)
-      else genEvasions(king, checkers)
+      else
+        genEvasions(king, checkers)
+
       val blockers = f.sliderBlockers
-      // if (blockers != 0 || this.epSquare != 0) {
-      //   moves.retain(m -> isSafe(king, m, blockers));
-      // }
-      List()
+      if blockers != 0 || !f.state.epSquare.isDefined then
+        moves.filter(m => f.isSafe(king, m, blockers))
+      else
+        moves
 
     def genEnPassant(ep: Square): List[Move] =
       val pawns = f.us & f.board.pawns & ep.pawnAttacks(!f.state.turn)
@@ -61,7 +63,17 @@ object StandardMovesGenerator:
         if safe
       yield Move.Castle(king, rook)
 
-    def genEvasions(king: Square, checkers: Bitboard): List[Move] = ???
+    def genEvasions(king: Square, checkers: Bitboard): List[Move] =
+      // Checks by these sliding pieces can maybe be blocked.
+      val sliders = checkers & (f.board.sliders)
+      val attacked = sliders.occupiedSquares.foldRight(0L)((s, a) => a | (Bitboard.RAYS(king)(s) ^ (1L << s)))
+      val safeKings = genSafeKing(king, ~f.us & ~attacked)
+      val blockers = if (checkers != 0 && !checkers.moreThanOne) then
+        println(s"between ${Bitboard.between(king, checkers.lsb.get) | checkers}")
+        checkers.lsb.map(c => genNonKing(Bitboard.between(king, c) | checkers)).getOrElse(List())
+      else
+        List[Move]()
+      safeKings ++ blockers
 
     def genKnight(mask: Bitboard): List[Move] =
       val knights = f.us & f.board.knights
@@ -117,9 +129,9 @@ object StandardMovesGenerator:
       yield genPawnMoves(from, to, true)
 
       // normal pawn moves
-      val singleMoves = ~f.board.occupied & (if f.isWhiteTurn then ((f.board.white & f.board.pawns) << 8) else ((f.board.black & f.board.pawns) >>> 8))
+      val singleMoves = ~f.board.occupied & (if f.isWhiteTurn then ((f.board.white & f.board.pawns) << 8) else ((f.board.black & f.board.pawns) >>> 8)) & mask
       val doubleMoves = ~f.board.occupied & (if f.isWhiteTurn then (singleMoves << 8) else (singleMoves >>> 8))
-                          & Bitboard.RANKS(if f.isWhiteTurn then 3 else 4)
+                          & Bitboard.RANKS(if f.isWhiteTurn then 3 else 4) & mask
 
       val s2: List[List[Move]] = for
         to <- singleMoves.occupiedSquares

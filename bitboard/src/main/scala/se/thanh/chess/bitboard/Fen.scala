@@ -11,16 +11,29 @@ import se.thanh.chess.core.Role
 import Bitboard.*
 
 import cats.syntax.all.*
+import se.thanh.chess.core.Move
 
 case class Fen(board: Board, state: State):
-    def us: Bitboard = board.byColor(state.turn)
-    def them: Bitboard = board.byColor(!state.turn)
-    def ourKing = board.king(state.turn)
-    def checkers = ourKing.map(k => board.attacksTo(k, !state.turn))
-    def sliderBlockers = board.sliderBlockers(state.turn)
-    def isWhiteTurn = state.turn.isWhite
-    def occupied = board.occupied
-    def isOccupied = board.isOccupied
+  def us: Bitboard   = board.byColor(state.turn)
+  def them: Bitboard = board.byColor(!state.turn)
+  def ourKing        = board.king(state.turn)
+  def checkers       = ourKing.map(k => board.attacksTo(k, !state.turn))
+  def sliderBlockers = board.sliderBlockers(state.turn)
+  def isWhiteTurn    = state.turn.isWhite
+  def occupied       = board.occupied
+  def isOccupied     = board.isOccupied
+
+  // Used for filtering candidate moves that would leave put the king in check.
+  def isSafe(king: Square, move: Move, blockers: Bitboard): Boolean =
+    move match
+      case Move.Normal(from, to, _, _) =>
+        val result = !(us & blockers).contains(from) || Bitboard.aligned(from, to, king)
+        result
+      case Move.EnPassant(from, to) =>
+        val newOccupied = (occupied ^ (1L << from) ^ (1L << to.combine(from))) | (1L << to)
+        (king.rookAttacks(newOccupied) & them & (board.rooks ^ board.queens)) == 0L &&
+        (king.bishopAttacks(newOccupied) & them & (board.bishops ^ board.queens)) == 0L
+      case _ => true
 
 enum ParseFenError:
   case InvalidFenFormat
@@ -60,10 +73,11 @@ object Fen:
   def parseCastlingRights(s: String): Either[ParseFenError, Bitboard] =
     s match
       case "-" => Right(0L)
-      case _ => s.toList
-        .traverse(charToSquare)
-        .map(ls => ls.foldRight(0L)((s, b) => (1L << s) | b))
-        .toRight(ParseFenError.InvalidCastling)
+      case _ =>
+        s.toList
+          .traverse(charToSquare)
+          .map(ls => ls.foldRight(0L)((s, b) => (1L << s) | b))
+          .toRight(ParseFenError.InvalidCastling)
 
   def parseEpPassantSquare(s: String): Either[ParseFenError, Option[Square]] =
     val epSquares = for

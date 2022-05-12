@@ -97,6 +97,9 @@ object Bitboard:
 
   initialize()
 
+  def aligned(a: Square, b: Square, c: Square): Boolean =
+    RAYS(a)(b).contains(c)
+
   def between(a: Square, b: Square): Bitboard =
     BETWEEN(a)(b)
 

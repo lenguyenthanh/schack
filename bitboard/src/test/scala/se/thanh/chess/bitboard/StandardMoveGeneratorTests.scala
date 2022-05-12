@@ -85,6 +85,17 @@ class StandardMovesGeneratorTests extends FunSuite:
     }
   }
 
+  test("genNonKing with fenFixtures") {
+    FenFixtures.fens.foreach { str =>
+      val fen           = Fen.parse(str).getOrElse(throw RuntimeException("boooo"))
+      val targets       = ~fen.us
+      val moves         = fen.genNonKing(targets)
+      val moveList      = MoveList()
+      val expectedMoves = fen.cBoard.genNonKing(targets, moveList)
+      assertMoves(moves, moveList)
+    }
+  }
+
   test("genSafeKing with fenFixtures") {
     FenFixtures.fens.foreach { str =>
       val fen           = Fen.parse(str).getOrElse(throw RuntimeException("boooo"))
@@ -105,6 +116,28 @@ class StandardMovesGeneratorTests extends FunSuite:
       val moves         = fen.genCastling(king)
       val moveList      = MoveList()
       val expectedMoves = fen.cBoard.genCastling(king, moveList)
+      assertMoves(moves, moveList)
+    }
+  }
+
+  test("genEvasion with fenFixtures") {
+    FenFixtures.fens.foreach { str =>
+      val fen           = Fen.parse(str).getOrElse(throw RuntimeException("boooo"))
+      val king = fen.ourKing.get
+      val checkers = fen.checkers.get
+      val moves         = fen.genEvasions(king, checkers)
+      val moveList      = MoveList()
+      val expectedMoves = fen.cBoard.genEvasions(king, checkers, moveList)
+      assertMoves(moves, moveList)
+    }
+  }
+
+  test("legalMoves with fenFixtures") {
+    FenFixtures.fens.foreach { str =>
+      val fen           = Fen.parse(str).getOrElse(throw RuntimeException("boooo"))
+      val moves         = fen.generate
+      val moveList      = MoveList()
+      val expectedMoves = fen.cBoard.legalMoves(moveList)
       assertMoves(moves, moveList)
     }
   }

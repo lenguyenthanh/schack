@@ -22,6 +22,8 @@ case class Board(
 ):
   def isOccupied(s: Square): Boolean = occupied.contains(s)
 
+  def sliders = bishops ^ rooks ^ queens
+
   def byColor: Color => Bitboard =
       case Color.White => white
       case Color.Black => black
@@ -69,8 +71,10 @@ case class Board(
 
   /** Find all blockers between the king and attacking sliders
     * First we find all snipers (all potential sliders which can attack the king)
-    * Then we loop over those snipers if there is no only one blockers between
+    * Then we loop over those snipers if there is only one blockers between
     * the king and the sniper we add them into the blockers list
+    *
+    * This is being used when checking a move is safe for the king or not
     */
   def sliderBlockers(us: Color): Bitboard =
     val ourKing = king(us) match

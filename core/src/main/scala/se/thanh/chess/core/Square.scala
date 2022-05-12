@@ -84,7 +84,5 @@ object Square:
     // mirror vertically
     def mirror: Square = s ^ 0x38
 
-    def combine(o: Square) =
+    def combine(o: Square): Square =
       square(s.file, o.rank)
-
-    def aligned(o: Square): Boolean = ???
