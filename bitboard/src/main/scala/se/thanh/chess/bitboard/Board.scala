@@ -53,6 +53,9 @@ case class Board(
     (kings & byColor(color)).lsb
 
   def attacksTo(s: Square, attacker: Color): Bitboard =
+    attacksTo(s, attacker, occupied)
+
+  def attacksTo(s: Square, attacker: Color, occupied: Bitboard): Bitboard =
     byColor(attacker) & (
       s.rookAttacks(occupied) & (rooks ^ queens) |
       s.bishopAttacks(occupied) & (bishops ^ queens) |
@@ -63,10 +66,6 @@ case class Board(
 
   def isCheck(color: Color): Boolean =
     king(color).fold(false)(k => attacksTo(k, !color) != 0)
-
-  def seventhRank: Color => Rank =
-    case Color.White => Rank.seventh
-    case Color.Black => Rank.second
 
   /** Find all blockers between the king and attacking sliders
     * First we find all snipers (all potential sliders which can attack the king)

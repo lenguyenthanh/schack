@@ -2,6 +2,7 @@ package se.thanh.chess.bitboard
 
 import se.thanh.chess.core.Square
 import se.thanh.chess.core.Color
+import se.thanh.chess.core.Rank
 
 import scala.collection.mutable.ListBuffer
 
@@ -140,6 +141,18 @@ object Bitboard:
         sx.addOne(bb.lsb.get)
         bb &= (bb - 1L)
       sx.toList
+
+  extension (c: Color)
+    def seventhRank: Rank =
+      c match
+        case Color.White => Rank.seventh
+        case Color.Black => Rank.second
+
+    def firstRank: Rank =
+      c match
+        case Color.White => Rank.first
+        case Color.Black => Rank.eighth
+
 
   private def distance(a: Int, b: Int): Int =
     Math.max(Math.abs(a.file - b.file), Math.abs(a.rank - b.rank))

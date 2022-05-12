@@ -17,8 +17,7 @@ object File:
 
   def fromSquare(s: Square): File = s & 7
 
-  extension (f: File)
-    def char: Char = ('a' + f).toChar
+  def char(f: File): Char = ('a' + f).toChar
 
   val a: File = 0
   val b: File = 1
@@ -52,7 +51,14 @@ object Rank:
 
 object Square:
 
-  import File.*
+  val a1: Square = 0
+  val b1: Square = 1
+  val c1: Square = 2
+  val d1: Square = 3
+  val e1: Square = 4
+  val f1: Square = 5
+  val g1: Square = 6
+  val h1: Square = 7
 
   def apply(i: Int): Option[Square] =
     if (i >= 0 && i < 64) Some(i)
@@ -71,7 +77,7 @@ object Square:
     def rank: Rank = Rank.fromSquare(s)
 
     def uci: String =
-      val f = s.file.char
+      val f = File.char(s.file)
       val r = Rank.char(s.rank)
       s"$f$r"
 

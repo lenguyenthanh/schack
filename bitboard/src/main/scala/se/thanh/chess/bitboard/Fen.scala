@@ -19,6 +19,7 @@ case class Fen(board: Board, state: State):
     def checkers = ourKing.map(k => board.attacksTo(k, !state.turn))
     def sliderBlockers = board.sliderBlockers(state.turn)
     def isWhiteTurn = state.turn.isWhite
+    def occupied = board.occupied
     def isOccupied = board.isOccupied
 
 enum ParseFenError:

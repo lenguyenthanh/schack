@@ -10,5 +10,8 @@ enum Move(from: Square, to: Square):
   def uci: String =
     this match
       case Promotion(from, to, role, _) => s"${from.uci}${to.uci}${role.symbol}"
-      case Castle(from, to) => s"${from.uci}${to.uci}" // TODO review
+      case Castle(from, to) => {
+        val k = (if to < from then Square.c1 else Square.g1).combine(from)
+        s"${from.uci}${k.uci}"
+      }
       case _ => s"${from.uci}${to.uci}"

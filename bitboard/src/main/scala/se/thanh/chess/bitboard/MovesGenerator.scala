@@ -47,7 +47,20 @@ object StandardMovesGenerator:
         if f.board.attacksTo(to, !f.state.turn) == 0
       yield Move.Normal(king, to, Role.King, f.isOccupied(to))
 
-    def genCastling(king: Square): List[Move] = ???
+    def genCastling(king: Square): List[Move] =
+      val firstRank = f.state.turn.firstRank
+      val rooks = f.state.castlingRights & Bitboard.RANKS(firstRank)
+      for
+        rook <- rooks.occupiedSquares
+        path = Bitboard.between(king, rook)
+        if (path & f.occupied) == 0
+        toRank = if rook < king then Square.c1 else Square.g1
+        kingTo = toRank.combine(king)
+        kingPath = Bitboard.between(king, kingTo) | (1L << kingTo) | (1L << king)
+        safe = kingPath.occupiedSquares.map(s => f.board.attacksTo(s, !f.state.turn, f.occupied ^ (1L << king)) == 0).foldRight(true)((a, b) => a && b)
+        if safe
+      yield Move.Castle(king, rook)
+
     def genEvasions(king: Square, checkers: Bitboard): List[Move] = ???
 
     def genKnight(mask: Bitboard): List[Move] =
@@ -121,7 +134,7 @@ object StandardMovesGenerator:
       s1.flatten ++ s2.flatten ++ s3
 
     private def genPawnMoves(from: Square, to: Square, capture: Boolean): List[Move] =
-      if from.rank == f.board.seventhRank(f.state.turn) then
+      if from.rank == f.state.turn.seventhRank then
         List(Role.Queen, Role.Knight, Role.Rook, Role.Bishop).map(r => Move.Promotion(from, to, r, capture))
       else
         List(Move.Normal(from, to, Role.Pawn, capture))

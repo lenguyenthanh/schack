@@ -93,8 +93,18 @@ class StandardMovesGeneratorTests extends FunSuite:
       val moves         = fen.genSafeKing(king, targets)
       val moveList      = MoveList()
       val expectedMoves = fen.cBoard.genSafeKing(king, targets, moveList)
-      println(moves)
-      println(moveList.uciSet)
+      assertMoves(moves, moveList)
+    }
+  }
+
+  test("genCastling with fenFixtures") {
+    FenFixtures.fens.foreach { str =>
+      val fen           = Fen.parse(str).getOrElse(throw RuntimeException("boooo"))
+      val king = fen.ourKing.get
+      val targets       = ~fen.us
+      val moves         = fen.genCastling(king)
+      val moveList      = MoveList()
+      val expectedMoves = fen.cBoard.genCastling(king, moveList)
       assertMoves(moves, moveList)
     }
   }
