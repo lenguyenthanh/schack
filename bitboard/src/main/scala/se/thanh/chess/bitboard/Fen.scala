@@ -17,7 +17,7 @@ case class Fen(board: Board, state: State):
   def us: Bitboard   = board.byColor(state.turn)
   def them: Bitboard = board.byColor(!state.turn)
   def ourKing        = board.king(state.turn)
-  def checkers       = ourKing.map(k => board.attacksTo(k, !state.turn))
+  def checkers       = ourKing.map(board.attacksTo(_, !state.turn))
   def sliderBlockers = board.sliderBlockers(state.turn)
   def isWhiteTurn    = state.turn.isWhite
   def occupied       = board.occupied
@@ -30,10 +30,12 @@ case class Fen(board: Board, state: State):
         val result = !(us & blockers).contains(from) || Bitboard.aligned(from, to, king)
         result
       case Move.EnPassant(from, to) =>
-        val newOccupied = (occupied ^ (1L << from) ^ (1L << to.combine(from))) | (1L << to)
+        val newOccupied = (occupied ^ from.bitboard ^ to.combine(from).bitboard) | to.bitboard
         (king.rookAttacks(newOccupied) & them & (board.rooks ^ board.queens)) == 0L &&
         (king.bishopAttacks(newOccupied) & them & (board.bishops ^ board.queens)) == 0L
       case _ => true
+
+  def play(move: Move): Fen = ???
 
 enum ParseFenError:
   case InvalidFenFormat
@@ -76,7 +78,7 @@ object Fen:
       case _ =>
         s.toList
           .traverse(charToSquare)
-          .map(ls => ls.foldRight(0L)((s, b) => (1L << s) | b))
+          .map(_.foldRight(0L)((s, b) => s.bitboard | b))
           .toRight(ParseFenError.InvalidCastling)
 
   def parseEpPassantSquare(s: String): Either[ParseFenError, Option[Square]] =
@@ -101,7 +103,8 @@ object Fen:
     var file   = 0
     val iter   = boardFen.iterator
     val pieces = ListBuffer[(Piece, Square)]()
-    while iter.hasNext
+    while
+      iter.hasNext
     do
       iter.next match
         case '/' if file == 8 => {
@@ -109,7 +112,7 @@ object Fen:
           rank -= 1
           if rank < 0 then return Left(ParseFenError.InvalidBoard)
         }
-        case ch if ('1' to '8' contains ch) => {
+        case ch if '1' to '8' contains ch => {
           file += (ch - '0')
           if file > 8 then return Left(ParseFenError.InvalidBoard)
         }

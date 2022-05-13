@@ -15,10 +15,10 @@ object StandardMovesGenerator:
   extension (f: Fen)
     // todo this function should return Either[InvalidPosition, List[Move]]
     def generate: List[Move] =
-      val enPassantMoves = f.state.epSquare.fold(List())(genEnPassant)
       // todo fix
       // if no king returns Left
       val king = f.ourKing.get
+      val enPassantMoves = f.state.epSquare.fold(List())(genEnPassant)
       val checkers = f.checkers.get
       val moves = if checkers == 0 then
         val targets = ~f.us
@@ -35,8 +35,8 @@ object StandardMovesGenerator:
     def genEnPassant(ep: Square): List[Move] =
       val pawns = f.us & f.board.pawns & ep.pawnAttacks(!f.state.turn)
       val ff: Bitboard => Option[(Square, Bitboard)] = bb =>
-        bb.lsb.map(s => (s, bb & (bb - 1L)))
-      List.unfold(pawns)(ff).map(s => Move.EnPassant(s, ep))
+        bb.lsb.map((_, bb & (bb - 1L)))
+      List.unfold(pawns)(ff).map(Move.EnPassant(_, ep))
 
     def genNonKing(mask: Bitboard): List[Move] =
       genPawn(mask) ++ genKnight(mask) ++ genBishop(mask) ++ genRook(mask) ++ genQueen(mask)
@@ -59,7 +59,7 @@ object StandardMovesGenerator:
         toRank = if rook < king then Square.c1 else Square.g1
         kingTo = toRank.combine(king)
         kingPath = Bitboard.between(king, kingTo) | (1L << kingTo) | (1L << king)
-        safe = kingPath.occupiedSquares.map(s => f.board.attacksTo(s, !f.state.turn, f.occupied ^ (1L << king)) == 0).foldRight(true)((a, b) => a && b)
+        safe = kingPath.occupiedSquares.map(f.board.attacksTo(_, !f.state.turn, f.occupied ^ (1L << king)) == 0).forall(identity)
         if safe
       yield Move.Castle(king, rook)
 
@@ -68,11 +68,10 @@ object StandardMovesGenerator:
       val sliders = checkers & (f.board.sliders)
       val attacked = sliders.occupiedSquares.foldRight(0L)((s, a) => a | (Bitboard.RAYS(king)(s) ^ (1L << s)))
       val safeKings = genSafeKing(king, ~f.us & ~attacked)
-      val blockers = if (checkers != 0 && !checkers.moreThanOne) then
-        println(s"between ${Bitboard.between(king, checkers.lsb.get) | checkers}")
+      val blockers = if !checkers.moreThanOne then
         checkers.lsb.map(c => genNonKing(Bitboard.between(king, c) | checkers)).getOrElse(List())
       else
-        List[Move]()
+        List()
       safeKings ++ blockers
 
     def genKnight(mask: Bitboard): List[Move] =
@@ -147,6 +146,6 @@ object StandardMovesGenerator:
 
     private def genPawnMoves(from: Square, to: Square, capture: Boolean): List[Move] =
       if from.rank == f.state.turn.seventhRank then
-        List(Role.Queen, Role.Knight, Role.Rook, Role.Bishop).map(r => Move.Promotion(from, to, r, capture))
+        List(Role.Queen, Role.Knight, Role.Rook, Role.Bishop).map(Move.Promotion(from, to, _, capture))
       else
         List(Move.Normal(from, to, Role.Pawn, capture))

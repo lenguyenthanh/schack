@@ -126,6 +126,9 @@ object Bitboard:
     def knightAttacks: Bitboard =
       KNIGHT_ATTACKS(s)
 
+    def bitboard: Bitboard =
+      1L << s
+
   extension (b: Bitboard)
     def contains(s: Int): Boolean =
       (b & (1L << s)) != 0

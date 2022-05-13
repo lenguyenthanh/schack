@@ -8,6 +8,7 @@ import se.thanh.chess.core.Role
 import se.thanh.chess.core.Piece
 
 import cats.syntax.all.*
+import se.thanh.chess.core.Move
 
 case class Board(
     pawns: Bitboard,
@@ -45,6 +46,8 @@ case class Board(
   def pieceAt(s: Square): Option[Piece] =
     (roleAt(s), colorAt(s)).mapN(Piece.apply)
 
+  // TODO returns Option[Boolean]
+  // None in case of no king
   def whiteAt(s: Square): Boolean =
     colorAt(s).fold(false)(c => c == Color.White)
 
@@ -94,6 +97,8 @@ case class Board(
 
     bs.fold(0L)((a, b) => a | b)
 
+  def play(move: Move): Board = ???
+
 object Board:
   val empty = Board(
     pawns = 0L,
@@ -130,7 +135,7 @@ object Board:
     var occupied = 0L
 
     pieces.foreach { (p, s) =>
-      val position = (1L << s)
+      val position = s.bitboard
       occupied |= position
       p.role match
         case Role.Pawn   => pawns |= position

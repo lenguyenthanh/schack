@@ -43,7 +43,7 @@ class BitboardTests extends ScalaCheckSuite:
         result   = Bitboard.slidingAttacks(s, occupied, deltas)
         expected = CBB.slidingAttacks(s, occupied, deltas)
       yield result == expected
-      result.fold(true)((a, b) => a && b)
+      result.forall(identity)
     }
   }
 

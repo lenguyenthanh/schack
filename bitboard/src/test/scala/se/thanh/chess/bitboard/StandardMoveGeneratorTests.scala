@@ -144,5 +144,5 @@ class StandardMovesGeneratorTests extends FunSuite:
 
   private def assertMoves(moves: List[Move], moveList: MoveList) =
     assertEquals(moves.length, moveList.size)
-    assertEquals(moves.map(m => m.uci).toSet, moveList.uciSet)
+    assertEquals(moves.map(_.uci).toSet, moveList.uciSet)
 
