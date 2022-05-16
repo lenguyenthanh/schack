@@ -26,21 +26,21 @@ case class Board(
   def sliders = bishops ^ rooks ^ queens
 
   def byColor: Color => Bitboard =
-      case Color.White => white
-      case Color.Black => black
+    case Color.White => white
+    case Color.Black => black
 
   def roleAt(s: Square): Option[Role] =
-    if(pawns.contains(s)) then Some(Role.Pawn)
-    else if(knights.contains(s)) then Some(Role.Knight)
-    else if(bishops.contains(s)) then Some(Role.Bishop)
-    else if(rooks.contains(s)) then Some(Role.Rook)
-    else if(queens.contains(s)) then Some(Role.Queen)
-    else if(kings.contains(s)) then Some(Role.King)
+    if (pawns.contains(s)) then Some(Role.Pawn)
+    else if (knights.contains(s)) then Some(Role.Knight)
+    else if (bishops.contains(s)) then Some(Role.Bishop)
+    else if (rooks.contains(s)) then Some(Role.Rook)
+    else if (queens.contains(s)) then Some(Role.Queen)
+    else if (kings.contains(s)) then Some(Role.King)
     else None
 
   def colorAt(s: Square): Option[Color] =
-    if(white.contains(s)) then Some(Color.White)
-    else if(black.contains(s)) then Some(Color.Black)
+    if (white.contains(s)) then Some(Color.White)
+    else if (black.contains(s)) then Some(Color.Black)
     else None
 
   def pieceAt(s: Square): Option[Piece] =
@@ -63,31 +63,30 @@ case class Board(
   def attacksTo(s: Square, attacker: Color, occupied: Bitboard): Bitboard =
     byColor(attacker) & (
       s.rookAttacks(occupied) & (rooks ^ queens) |
-      s.bishopAttacks(occupied) & (bishops ^ queens) |
-      s.knightAttacks & knights |
-      s.kingAttacks & kings |
-      s.pawnAttacks(!attacker) & pawns
+        s.bishopAttacks(occupied) & (bishops ^ queens) |
+        s.knightAttacks & knights |
+        s.kingAttacks & kings |
+        s.pawnAttacks(!attacker) & pawns
     )
 
   def isCheck(color: Color): Boolean =
     king(color).fold(false)(k => attacksTo(k, !color) != 0)
 
-  /** Find all blockers between the king and attacking sliders
-    * First we find all snipers (all potential sliders which can attack the king)
-    * Then we loop over those snipers if there is only one blockers between
-    * the king and the sniper we add them into the blockers list
+  /** Find all blockers between the king and attacking sliders First we find all snipers (all potential sliders which
+    * can attack the king) Then we loop over those snipers if there is only one blockers between the king and the sniper
+    * we add them into the blockers list
     *
     * This is being used when checking a move is safe for the king or not
     */
   def sliderBlockers(us: Color): Bitboard =
     val ourKing = king(us) match
       case Some(s) => s
-      case None => return 0L
+      case None    => return 0L
 
     val snipers = byColor(!us) & (
-        ourKing.rookAttacks(0L) & (rooks ^ queens) |
+      ourKing.rookAttacks(0L) & (rooks ^ queens) |
         ourKing.bishopAttacks(0L) & (bishops ^ queens)
-      )
+    )
 
     val bs = for
       sniper <- snipers.occupiedSquares
@@ -98,6 +97,65 @@ case class Board(
     bs.fold(0L)((a, b) => a | b)
 
   def play(move: Move): Board = ???
+
+  // todo more efficient
+  def discard(s: Square): Board =
+    pieceAt(s).fold(this) { p =>
+      val m = s.bitboard
+      copy(
+        pawns = updateRole(m, Role.Pawn)(p.role),
+        knights = updateRole(m, Role.Knight)(p.role),
+        bishops = updateRole(m, Role.Bishop)(p.role),
+        rooks = updateRole(m, Role.Rook)(p.role),
+        queens = updateRole(m, Role.Queen)(p.role),
+        kings = updateRole(m, Role.King)(p.role),
+        white = updateColor(m, Color.White)(p.color),
+        black = updateColor(m, Color.Black)(p.color),
+        occupied ^ m
+      )
+    }
+
+  def updateRole(mask: Bitboard, role: Role): Role => Bitboard =
+    case Role.Pawn if role == Role.Pawn => pawns ^ mask
+    case Role.Knight if role == Role.Knight => knights ^ mask
+    case Role.Bishop if role == Role.Bishop => bishops ^ mask
+    case Role.Rook if role == Role.Rook => rooks ^ mask
+    case Role.Queen if role == Role.Queen => queens ^ mask
+    case Role.King if role == Role.King => kings ^ mask
+    case _ => roles(role)
+
+  def roles: Role => Bitboard =
+    case Role.Pawn => pawns
+    case Role.Knight => knights
+    case Role.Bishop => bishops
+    case Role.Rook => rooks
+    case Role.Queen => queens
+    case Role.King => kings
+
+
+  def updateColor(mask: Bitboard, color: Color): Color => Bitboard =
+    case Color.White if color == Color.White => white ^ mask
+    case Color.Black if color == Color.Black => black ^ mask
+    case _ => colors(color)
+
+  def colors: Color => Bitboard =
+    case Color.White => white
+    case Color.Black => black
+
+  def put(s: Square, p: Piece): Board =
+    val b = discard(s)
+    val m = s.bitboard
+    b.copy(
+        pawns = updateRole(m, Role.Pawn)(p.role),
+        knights = updateRole(m, Role.Knight)(p.role),
+        bishops = updateRole(m, Role.Bishop)(p.role),
+        rooks = updateRole(m, Role.Rook)(p.role),
+        queens = updateRole(m, Role.Queen)(p.role),
+        kings = updateRole(m, Role.King)(p.role),
+        white = updateColor(m, Color.White)(p.color),
+        black = updateColor(m, Color.Black)(p.color),
+        occupied ^ m
+      )
 
 object Board:
   val empty = Board(
