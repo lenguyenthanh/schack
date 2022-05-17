@@ -17,3 +17,11 @@ enum Color:
       case Black => false
 
   def isBlack = !isWhite
+
+object Color:
+
+  def fromBoolean(isWhite: Boolean): Color =
+    if isWhite then
+      Color.White
+    else
+      Color.Black

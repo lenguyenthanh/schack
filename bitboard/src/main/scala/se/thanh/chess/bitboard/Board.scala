@@ -96,7 +96,16 @@ case class Board(
 
     bs.fold(0L)((a, b) => a | b)
 
-  def play(move: Move): Board = ???
+  // TODO move: Board => Board
+  // We can implement as PieceMap => PieceMap
+  def play(color: Color): Move => Board =
+    case Move.Normal(from, to, role, _)    => discard(from).put(to, role, color)
+    case Move.Promotion(from, to, role, _) => discard(from).put(to, role, color)
+    case Move.EnPassant(from, to)          => discard(from).discard(to.combine(from)).put(to, Role.Pawn, color)
+    case Move.Castle(from, to) =>
+      val rookTo = (if to < from then Square.d1 else Square.f1).combine(to)
+      val kingTo = (if to < from then Square.c1 else Square.g1).combine(to)
+      discard(from).discard(to).put(rookTo, Role.Rook, color).put(kingTo, Role.King, color)
 
   // todo more efficient
   def discard(s: Square): Board =
@@ -116,46 +125,55 @@ case class Board(
     }
 
   def updateRole(mask: Bitboard, role: Role): Role => Bitboard =
-    case Role.Pawn if role == Role.Pawn => pawns ^ mask
+    case Role.Pawn if role == Role.Pawn     => pawns ^ mask
     case Role.Knight if role == Role.Knight => knights ^ mask
     case Role.Bishop if role == Role.Bishop => bishops ^ mask
-    case Role.Rook if role == Role.Rook => rooks ^ mask
-    case Role.Queen if role == Role.Queen => queens ^ mask
-    case Role.King if role == Role.King => kings ^ mask
-    case _ => roles(role)
+    case Role.Rook if role == Role.Rook     => rooks ^ mask
+    case Role.Queen if role == Role.Queen   => queens ^ mask
+    case Role.King if role == Role.King     => kings ^ mask
+    case _                                  => roles(role)
 
   def roles: Role => Bitboard =
-    case Role.Pawn => pawns
+    case Role.Pawn   => pawns
     case Role.Knight => knights
     case Role.Bishop => bishops
-    case Role.Rook => rooks
-    case Role.Queen => queens
-    case Role.King => kings
-
+    case Role.Rook   => rooks
+    case Role.Queen  => queens
+    case Role.King   => kings
 
   def updateColor(mask: Bitboard, color: Color): Color => Bitboard =
     case Color.White if color == Color.White => white ^ mask
     case Color.Black if color == Color.Black => black ^ mask
-    case _ => colors(color)
+    case _                                   => colors(color)
 
   def colors: Color => Bitboard =
     case Color.White => white
     case Color.Black => black
 
-  def put(s: Square, p: Piece): Board =
+  def put(s: Square, role: Role, color: Color): Board =
     val b = discard(s)
     val m = s.bitboard
     b.copy(
-        pawns = updateRole(m, Role.Pawn)(p.role),
-        knights = updateRole(m, Role.Knight)(p.role),
-        bishops = updateRole(m, Role.Bishop)(p.role),
-        rooks = updateRole(m, Role.Rook)(p.role),
-        queens = updateRole(m, Role.Queen)(p.role),
-        kings = updateRole(m, Role.King)(p.role),
-        white = updateColor(m, Color.White)(p.color),
-        black = updateColor(m, Color.Black)(p.color),
-        occupied ^ m
-      )
+      pawns = b.updateRole(m, Role.Pawn)(role),
+      knights = b.updateRole(m, Role.Knight)(role),
+      bishops = b.updateRole(m, Role.Bishop)(role),
+      rooks = b.updateRole(m, Role.Rook)(role),
+      queens = b.updateRole(m, Role.Queen)(role),
+      kings = b.updateRole(m, Role.King)(role),
+      white = b.updateColor(m, Color.White)(color),
+      black = b.updateColor(m, Color.Black)(color),
+      occupied = b.occupied ^ m,
+    )
+
+  def put(s: Square, p: Piece): Board =
+    put(s, p.role, p.color)
+
+  // TODO remove unsafe get
+  // we believe in the integrity of bitboard
+  // tests pieceMap . fromMap = identity
+  def pieceMap: Map[Square, Piece] =
+    occupied.occupiedSquares.map(s => (s, pieceAt(s).get)).toMap
+
 
 object Board:
   val empty = Board(
@@ -181,7 +199,7 @@ object Board:
     occupied = 0xffff00000000ffffL
   )
 
-  def fromPieces(pieces: List[(Piece, Square)]): Board =
+  def fromMap(pieces: Map[Square, Piece]): Board =
     var pawns    = 0L
     var knights  = 0L
     var bishops  = 0L
@@ -192,7 +210,7 @@ object Board:
     var black    = 0L
     var occupied = 0L
 
-    pieces.foreach { (p, s) =>
+    pieces.foreach { (s, p) =>
       val position = s.bitboard
       occupied |= position
       p.role match

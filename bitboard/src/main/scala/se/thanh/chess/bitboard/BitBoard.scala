@@ -149,15 +149,27 @@ object Bitboard:
       sx.toList
 
   extension (c: Color)
-    def seventhRank: Rank =
-      c match
-        case Color.White => Rank.seventh
-        case Color.Black => Rank.second
 
     def firstRank: Rank =
       c match
         case Color.White => Rank.first
         case Color.Black => Rank.eighth
+
+    def secondRank: Rank =
+      c match
+        case Color.White => Rank.second
+        case Color.Black => Rank.seventh
+
+    def seventhRank: Rank =
+      c match
+        case Color.White => Rank.seventh
+        case Color.Black => Rank.second
+
+    def lastRank: Rank =
+      c match
+        case Color.White => Rank.eighth
+        case Color.Black => Rank.first
+
 
 
   private def distance(a: Int, b: Int): Int =

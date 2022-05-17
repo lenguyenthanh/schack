@@ -3,10 +3,12 @@ package se.thanh.chess.bitboard
 import munit.FunSuite
 import Helpers.*
 import se.thanh.chess.core.Color
+import se.thanh.chess.core.Role
+import se.thanh.chess.core.Move
 import se.thanh.chess.core.Square
+import se.thanh.chess.core.Piece
 
 import cats.syntax.all.*
-import se.thanh.chess.core.Piece
 
 class BoardTests extends FunSuite:
 
@@ -63,4 +65,26 @@ class BoardTests extends FunSuite:
       val result = pieces.foldRight(Board.empty)((s, b) => b.put(s._1, s._2))
       assertEquals(result, fen.board)
     }
+  }
+
+  test("put case 1") {
+    val fen = Fen.parse("8/8/8/8/p7/1P6/8/8 w - - 0 1").getOrElse(throw RuntimeException("booo"))
+    val result = fen.board.put(Square.a4, Piece(Role.Pawn, Color.White))
+    val expectedMap = fen.board.pieceMap + (Square.a4 -> Piece(Role.Pawn, Color.White))
+    assertEquals(result.pieceMap, expectedMap)
+  }
+
+  test("play with standard board") {
+      val board = Board.standard
+      val newBoard = board.play(Color.White)(Move.Normal(Square.e2, Square.e4, Role.Pawn, false))
+      val expectedMap = (board.pieceMap - Square.e2) + (Square.e4 -> Piece(Role.Pawn, Color.White))
+      val result = newBoard.pieceMap
+      assertEquals(result, expectedMap)
+  }
+
+  test("case 1") {
+    val fen = Fen.parse("rnbqkbnr/1ppppppp/8/8/p7/PPP5/3PPPPP/RNBQKBNR w KQkq - 0 4").getOrElse(throw RuntimeException("booo"))
+    val result = fen.play(Move.Normal(Square.b3, Square.a4, Role.Pawn, true))
+    val expectedMap = (fen.board.pieceMap - Square.b3) + (Square.a4 -> Piece(Role.Pawn, Color.White))
+    assertEquals(result.board.pieceMap, expectedMap)
   }

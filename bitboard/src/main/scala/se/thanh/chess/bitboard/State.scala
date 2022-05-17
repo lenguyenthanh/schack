@@ -9,6 +9,7 @@ import scala.collection.mutable.ListBuffer
 import se.thanh.chess.core.Role
 import Bitboard.*
 import cats.syntax.all.*
+import se.thanh.chess.core.Move
 
 /** All the information needed to restart the game beside board position
   * We only deal with standard variant now, but in the future each variant
@@ -22,13 +23,16 @@ case class State(
     // 1 in position of a rook means castling right
     castlingRights: Bitboard,
     // The halfmove clock specifies a decimal number of half moves with respect
-    // to the 50 move draw rule. It is reset to zero after a capture or a pawn
+    // to the 50/75 move draw rule. It is reset to zero after a capture or a pawn
     // move and incremented otherwise.
-    halftMoves: Int,
+    halfMoves: Int,
     // The number of the full moves in a game. It starts at 1,
     // and is incremented after each Black's move.
     fullMoves: Int
-)
+):
+  def play(move: Move): State =
+    val role = move.role
+    ???
 
 object State:
   val start = State(Color.White, None, Bitboard.corners, 0, 1)

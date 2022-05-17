@@ -35,7 +35,40 @@ case class Fen(board: Board, state: State):
         (king.bishopAttacks(newOccupied) & them & (board.bishops ^ board.queens)) == 0L
       case _ => true
 
-  def play(move: Move): Fen = ???
+  // TODO now it works with valid move only
+  def play(move: Move): Fen =
+    Fen(playBoard(move), playState(move))
+
+  // TODO should we validate the move here?
+  // Either[InvalidMove, Board]
+  def playBoard: Move => Board =
+    board.play(state.turn)
+
+  def playState(move: Move): State =
+    val halfMoves = if move.isHalfMove then state.halfMoves + 1 else 0
+    val fullMoves = if state.turn.isBlack then state.fullMoves + 1 else state.fullMoves
+    val turn      = !state.turn
+    val halfCastlingRights =
+      if move.isCapture then
+        state.castlingRights & ~move.to.bitboard
+      else state.castlingRights
+    val haftState = state.copy(turn = turn, halfMoves = halfMoves, fullMoves = fullMoves, epSquare = None, castlingRights = halfCastlingRights)
+
+    move match
+      case Move.Normal(from, to, Role.Pawn, _) =>
+        val epSquare: Option[Square] =
+          if Math.abs(from - to) == 16 then
+            // TODO calculate their pawns attacks
+            Square(from + (if isWhiteTurn then 8 else -8))
+          else None
+        haftState.copy(epSquare = epSquare)
+      case Move.Normal(from, _, Role.Rook, _) =>
+        val castlingRights = halfCastlingRights & ~from.bitboard
+        haftState.copy(castlingRights = castlingRights)
+      case Move.Normal(_, _, Role.King, _) | Move.Castle(_, _)         =>
+        val castlingRights = halfCastlingRights & Bitboard.RANKS(state.turn.lastRank)
+        haftState.copy(castlingRights = castlingRights)
+      case _                             => haftState
 
 enum ParseFenError:
   case InvalidFenFormat
@@ -102,9 +135,8 @@ object Fen:
     var rank   = 7
     var file   = 0
     val iter   = boardFen.iterator
-    val pieces = ListBuffer[(Piece, Square)]()
-    while
-      iter.hasNext
+    val pieces = ListBuffer[(Square, Piece)]()
+    while iter.hasNext
     do
       iter.next match
         case '/' if file == 8 => {
@@ -118,27 +150,11 @@ object Fen:
         }
         case ch => {
           // println(s"do $ch $file $rank")
-          (pieceFromChar(ch), File(file), Rank(rank))
-            .mapN((p, f, r) => (p, Square.square(f, r)))
+          (Piece.fromChar(ch), File(file), Rank(rank))
+            .mapN((p, f, r) => (Square.square(f, r), p))
             .match
               case Some(p) => pieces.addOne(p)
               case None    => return Left(ParseFenError.InvalidBoard)
           file += 1
         }
-    Right(Board.fromPieces(pieces.toList))
-
-  def pieceFromChar(ch: Char): Option[Piece] =
-    ch match
-      case 'p' => Some(Piece(Role.Pawn, Color.Black))
-      case 'n' => Some(Piece(Role.Knight, Color.Black))
-      case 'b' => Some(Piece(Role.Bishop, Color.Black))
-      case 'r' => Some(Piece(Role.Rook, Color.Black))
-      case 'q' => Some(Piece(Role.Queen, Color.Black))
-      case 'k' => Some(Piece(Role.King, Color.Black))
-      case 'P' => Some(Piece(Role.Pawn, Color.White))
-      case 'N' => Some(Piece(Role.Knight, Color.White))
-      case 'B' => Some(Piece(Role.Bishop, Color.White))
-      case 'R' => Some(Piece(Role.Rook, Color.White))
-      case 'Q' => Some(Piece(Role.Queen, Color.White))
-      case 'K' => Some(Piece(Role.King, Color.White))
-      case _   => None
+    Right(Board.fromMap(pieces.toMap))
