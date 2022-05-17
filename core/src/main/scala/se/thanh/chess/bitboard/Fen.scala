@@ -1,17 +1,12 @@
 package se.thanh.chess.bitboard
 
-import se.thanh.chess.core.Color
-import se.thanh.chess.core.Square
-import se.thanh.chess.core.File
-import se.thanh.chess.core.Rank
-import se.thanh.chess.core.Piece
 import scala.collection.mutable.ListBuffer
-import se.thanh.chess.core.Role
 
-import Bitboard.*
+import se.thanh.chess.core.*
 
 import cats.syntax.all.*
-import se.thanh.chess.core.Move
+
+import Bitboard.*
 
 case class Fen(board: Board, state: State):
   def us: Bitboard   = board.byColor(state.turn)
@@ -49,10 +44,15 @@ case class Fen(board: Board, state: State):
     val fullMoves = if state.turn.isBlack then state.fullMoves + 1 else state.fullMoves
     val turn      = !state.turn
     val halfCastlingRights =
-      if move.isCapture then
-        state.castlingRights & ~move.to.bitboard
+      if move.isCapture then state.castlingRights & ~move.to.bitboard
       else state.castlingRights
-    val haftState = state.copy(turn = turn, halfMoves = halfMoves, fullMoves = fullMoves, epSquare = None, castlingRights = halfCastlingRights)
+    val haftState = state.copy(
+      turn = turn,
+      halfMoves = halfMoves,
+      fullMoves = fullMoves,
+      epSquare = None,
+      castlingRights = halfCastlingRights
+    )
 
     move match
       case Move.Normal(from, to, Role.Pawn, _) =>
@@ -65,10 +65,10 @@ case class Fen(board: Board, state: State):
       case Move.Normal(from, _, Role.Rook, _) =>
         val castlingRights = halfCastlingRights & ~from.bitboard
         haftState.copy(castlingRights = castlingRights)
-      case Move.Normal(_, _, Role.King, _) | Move.Castle(_, _)         =>
+      case Move.Normal(_, _, Role.King, _) | Move.Castle(_, _) =>
         val castlingRights = halfCastlingRights & Bitboard.RANKS(state.turn.lastRank)
         haftState.copy(castlingRights = castlingRights)
-      case _                             => haftState
+      case _ => haftState
 
 enum ParseFenError:
   case InvalidFenFormat

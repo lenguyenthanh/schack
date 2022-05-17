@@ -1,14 +1,10 @@
 package se.thanh.chess.bitboard
 
-import se.thanh.chess.core.Square
-import se.thanh.chess.core.Rank
-import se.thanh.chess.core.Color
-import Bitboard.*
-import se.thanh.chess.core.Role
-import se.thanh.chess.core.Piece
+import se.thanh.chess.core.*
 
 import cats.syntax.all.*
-import se.thanh.chess.core.Move
+
+import Bitboard.*
 
 case class Board(
     pawns: Bitboard,
@@ -162,7 +158,7 @@ case class Board(
       kings = b.updateRole(m, Role.King)(role),
       white = b.updateColor(m, Color.White)(color),
       black = b.updateColor(m, Color.Black)(color),
-      occupied = b.occupied ^ m,
+      occupied = b.occupied ^ m
     )
 
   def put(s: Square, p: Piece): Board =
@@ -173,7 +169,6 @@ case class Board(
   // tests pieceMap . fromMap = identity
   def pieceMap: Map[Square, Piece] =
     occupied.occupiedSquares.map(s => (s, pieceAt(s).get)).toMap
-
 
 object Board:
   val empty = Board(

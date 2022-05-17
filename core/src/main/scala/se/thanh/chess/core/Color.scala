@@ -21,7 +21,5 @@ enum Color:
 object Color:
 
   def fromBoolean(isWhite: Boolean): Color =
-    if isWhite then
-      Color.White
-    else
-      Color.Black
+    if isWhite then Color.White
+    else Color.Black

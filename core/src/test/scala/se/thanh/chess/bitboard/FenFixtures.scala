@@ -8,5 +8,5 @@ object FenFixtures:
     "1nbqkbnr/pppp1ppp/4p3/8/4K3/4r3/PPPPPPPP/RNBQ1BNR w - - 0 1",
     "r2qk1nr/ppp2ppp/2nb4/3p4/3P2b1/2PB1N2/PP3PPP/RNBQK2R w KQkq - 3 7",
     "r2qk1nr/ppp2ppp/3b4/3p4/3P2b1/2PB1Nn1/PP3PPP/RNBQK2R w KQkq - 3 7",
-    "r3k1nr/ppp2ppp/q2b1n2/3p4/3PB1b1/2P2N2/PP3PPP/RNBQK2R w KQkq - 3 7",
-    )
+    "r3k1nr/ppp2ppp/q2b1n2/3p4/3PB1b1/2P2N2/PP3PPP/RNBQK2R w KQkq - 3 7"
+  )

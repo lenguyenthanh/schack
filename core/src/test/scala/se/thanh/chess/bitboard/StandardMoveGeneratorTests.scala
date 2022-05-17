@@ -1,14 +1,12 @@
 package se.thanh.chess.bitboard
 
+import se.thanh.chess.core.*
+
 import munit.FunSuite
+import org.lichess.compression.game.MoveList
+
 import StandardMovesGenerator.*
 import Helpers.*
-import se.thanh.chess.core.Square
-import se.thanh.chess.core.File
-import se.thanh.chess.core.Rank
-import se.thanh.chess.core.Move
-import se.thanh.chess.core.Color
-import org.lichess.compression.game.MoveList
 
 class StandardMovesGeneratorTests extends FunSuite:
 
@@ -99,7 +97,7 @@ class StandardMovesGeneratorTests extends FunSuite:
   test("genSafeKing with fenFixtures") {
     FenFixtures.fens.foreach { str =>
       val fen           = Fen.parse(str).getOrElse(throw RuntimeException("boooo"))
-      val king = fen.ourKing.get
+      val king          = fen.ourKing.get
       val targets       = ~fen.us
       val moves         = fen.genSafeKing(king, targets)
       val moveList      = MoveList()
@@ -111,7 +109,7 @@ class StandardMovesGeneratorTests extends FunSuite:
   test("genCastling with fenFixtures") {
     FenFixtures.fens.foreach { str =>
       val fen           = Fen.parse(str).getOrElse(throw RuntimeException("boooo"))
-      val king = fen.ourKing.get
+      val king          = fen.ourKing.get
       val targets       = ~fen.us
       val moves         = fen.genCastling(king)
       val moveList      = MoveList()
@@ -123,8 +121,8 @@ class StandardMovesGeneratorTests extends FunSuite:
   test("genEvasion with fenFixtures") {
     FenFixtures.fens.foreach { str =>
       val fen           = Fen.parse(str).getOrElse(throw RuntimeException("boooo"))
-      val king = fen.ourKing.get
-      val checkers = fen.checkers.get
+      val king          = fen.ourKing.get
+      val checkers      = fen.checkers.get
       val moves         = fen.genEvasions(king, checkers)
       val moveList      = MoveList()
       val expectedMoves = fen.cBoard.genEvasions(king, checkers, moveList)
@@ -145,4 +143,3 @@ class StandardMovesGeneratorTests extends FunSuite:
   private def assertMoves(moves: List[Move], moveList: MoveList) =
     assertEquals(moves.length, moveList.size)
     assertEquals(moves.map(_.uci).toSet, moveList.uciSet)
-

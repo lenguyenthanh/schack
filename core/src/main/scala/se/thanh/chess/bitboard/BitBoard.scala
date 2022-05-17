@@ -1,16 +1,14 @@
 package se.thanh.chess.bitboard
 
-import se.thanh.chess.core.Square
-import se.thanh.chess.core.Color
-import se.thanh.chess.core.Rank
-
 import scala.collection.mutable.ListBuffer
+
+import se.thanh.chess.core.{ Color, Rank, Square }
 
 type Bitboard = Long
 
 object Bitboard:
 
-  val ALL   = -1L
+  val ALL     = -1L
   val corners = 0x8100000000000081L
 
   val RANKS = Array.fill(8)(0L)
@@ -87,12 +85,13 @@ object Bitboard:
     for
       a <- squareRange
       b <- squareRange
-      _ = if slidingAttacks(a, 0, ROOK_DELTAS).contains(b) then
-        BETWEEN(a)(b) = slidingAttacks(a, 1L << b, ROOK_DELTAS) & slidingAttacks(b, 1L << a, ROOK_DELTAS)
-        RAYS(a)(b) = (1L << a) | (1L << b) | slidingAttacks(a, 0, ROOK_DELTAS) & slidingAttacks(b, 0, ROOK_DELTAS)
-      else if slidingAttacks(a, 0, BISHOP_DELTAS).contains(b) then
-        BETWEEN(a)(b) = slidingAttacks(a, 1L << b, BISHOP_DELTAS) & slidingAttacks(b, 1L <<a, BISHOP_DELTAS)
-        RAYS(a)(b) = (1L << a) | (1L << b) | slidingAttacks(a, 0, BISHOP_DELTAS) & slidingAttacks(b, 0, BISHOP_DELTAS)
+      _ =
+        if slidingAttacks(a, 0, ROOK_DELTAS).contains(b) then
+          BETWEEN(a)(b) = slidingAttacks(a, 1L << b, ROOK_DELTAS) & slidingAttacks(b, 1L << a, ROOK_DELTAS)
+          RAYS(a)(b) = (1L << a) | (1L << b) | slidingAttacks(a, 0, ROOK_DELTAS) & slidingAttacks(b, 0, ROOK_DELTAS)
+        else if slidingAttacks(a, 0, BISHOP_DELTAS).contains(b) then
+          BETWEEN(a)(b) = slidingAttacks(a, 1L << b, BISHOP_DELTAS) & slidingAttacks(b, 1L << a, BISHOP_DELTAS)
+          RAYS(a)(b) = (1L << a) | (1L << b) | slidingAttacks(a, 0, BISHOP_DELTAS) & slidingAttacks(b, 0, BISHOP_DELTAS)
     yield ()
 
   initialize()
@@ -141,8 +140,7 @@ object Bitboard:
     def occupiedSquares: List[Square] =
       var bb = b
       val sx = ListBuffer[Square]()
-      while
-        bb != 0
+      while bb != 0
       do
         sx.addOne(bb.lsb.get)
         bb &= (bb - 1L)
@@ -169,8 +167,6 @@ object Bitboard:
       c match
         case Color.White => Rank.eighth
         case Color.Black => Rank.first
-
-
 
   private def distance(a: Int, b: Int): Int =
     Math.max(Math.abs(a.file - b.file), Math.abs(a.rank - b.rank))

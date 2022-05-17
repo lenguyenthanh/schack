@@ -1,12 +1,13 @@
 package se.thanh.chess.bitboard
 
+import se.thanh.chess.core.Arbitraries.given
+import se.thanh.chess.core.{ Color, Square }
+
 import munit.ScalaCheckSuite
 import org.lichess.compression.game.Bitboard as CBB
-import se.thanh.chess.core.Square
-import Bitboard.*
 import org.scalacheck.Prop
-import se.thanh.chess.core.Arbitraries.given
-import se.thanh.chess.core.Color
+
+import Bitboard.*
 
 class BitboardTests extends ScalaCheckSuite:
 

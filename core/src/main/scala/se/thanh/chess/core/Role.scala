@@ -10,9 +10,9 @@ enum Role:
 
   def symbol: Char =
     this match
-      case Pawn => 'p'
+      case Pawn   => 'p'
       case Knight => 'n'
       case Bishop => 'b'
-      case Rook => 'r'
-      case Queen => 'q'
-      case King => 'k'
+      case Rook   => 'r'
+      case Queen  => 'q'
+      case King   => 'k'

@@ -41,15 +41,12 @@ val commonSettings = Seq(
 
 def full(p: Project) = p % "test->test;compile->compile"
 
-val core = project.settings(commonSettings)
-val bitboard =
-  project.settings(commonSettings, libraryDependencies += Libs.compression).dependsOn(full(core))
-val chess = project.settings(commonSettings)
+val core = project.settings(commonSettings, libraryDependencies += Libs.compression)
 
 lazy val root = project
   .in(file("."))
   .settings(publish := {}, publish / skip := true)
-  .aggregate(chess)
+  .aggregate(core)
 
 // Commands
 addCommandAlias("build", "prepare; test")

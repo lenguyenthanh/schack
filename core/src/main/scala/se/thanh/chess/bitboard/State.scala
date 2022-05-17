@@ -1,19 +1,15 @@
 package se.thanh.chess.bitboard
 
-import se.thanh.chess.core.Color
-import se.thanh.chess.core.Square
-import se.thanh.chess.core.File
-import se.thanh.chess.core.Rank
-import se.thanh.chess.core.Piece
 import scala.collection.mutable.ListBuffer
-import se.thanh.chess.core.Role
-import Bitboard.*
-import cats.syntax.all.*
-import se.thanh.chess.core.Move
 
-/** All the information needed to restart the game beside board position
-  * We only deal with standard variant now, but in the future each variant
-  * can and should have different state.
+import se.thanh.chess.core.*
+
+import cats.syntax.all.*
+
+import Bitboard.*
+
+/** All the information needed to restart the game beside board position We only deal with standard variant now, but in
+  * the future each variant can and should have different state.
   */
 case class State(
     // color

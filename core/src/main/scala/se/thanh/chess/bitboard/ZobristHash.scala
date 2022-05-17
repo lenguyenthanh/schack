@@ -1,5 +1,3 @@
 package se.thanh.chess.bitboard
 
-object ZobristHash {
-  
-}
+object ZobristHash {}

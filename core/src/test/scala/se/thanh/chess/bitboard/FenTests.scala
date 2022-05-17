@@ -1,8 +1,9 @@
 package se.thanh.chess.bitboard
 
 import munit.FunSuite
-import Helpers.*
 import org.lichess.compression.game.Board as CBoard
+
+import Helpers.*
 import StandardMovesGenerator.*
 
 class FenTests extends FunSuite:
@@ -36,7 +37,7 @@ class FenTests extends FunSuite:
 
   test("play move with fixtures") {
     FenFixtures.fens.foreach { str =>
-      val fen      = Fen.parse(str).getOrElse(throw RuntimeException("boooo"))
+      val fen    = Fen.parse(str).getOrElse(throw RuntimeException("boooo"))
       val cboard = fen.cBoard
       val result: Fen = List.range(0, 49).foldLeft(fen) { (fen, _) =>
         fen.generate match
