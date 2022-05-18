@@ -5,7 +5,8 @@ import scala.collection.mutable.ListBuffer
 import se.thanh.chess.bitboard.Bitboard.*
 import se.thanh.chess.core.*
 
-/** The idea is each variant can have its own movs generator. Now I just want to finish standard variant first
+/** The idea is each variant can have its own movs generator.
+  * Now I just want to finish standard variant first
   */
 object StandardMovesGenerator:
   extension (f: Fen)
@@ -105,7 +106,9 @@ object StandardMovesGenerator:
       *   - single square moves
       *   - double square moves
       * @mask:
-      *   bitboard contains empty square or enemy pieces TODO @mask includes enemy king now, which should not be because
+      *   bitboard contains empty square or enemy pieces
+      *
+      *   TODO @mask includes enemy king now, which should not be because
       *   enemy cannot be captured by law
       */
     def genPawn(mask: Bitboard): List[Move] =
