@@ -25,10 +25,7 @@ case class State(
     // The number of the full moves in a game. It starts at 1,
     // and is incremented after each Black's move.
     fullMoves: Int
-):
-  def play(move: Move): State =
-    val role = move.role
-    ???
+)
 
 object State:
   val start = State(Color.White, None, Bitboard.corners, 0, 1)
