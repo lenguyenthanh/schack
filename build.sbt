@@ -41,12 +41,13 @@ val commonSettings = Seq(
 
 def full(p: Project) = p % "test->test;compile->compile"
 
-val core = project.settings(commonSettings, libraryDependencies += Libs.compression)
+val core = crossProject(JSPlatform, JVMPlatform)
+  .settings(commonSettings, libraryDependencies += Libs.compression)
 
 lazy val root = project
   .in(file("."))
   .settings(publish := {}, publish / skip := true)
-  .aggregate(core)
+  .aggregate(core.js, core.jvm)
 
 // Commands
 addCommandAlias("build", "prepare; test")
