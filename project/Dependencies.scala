@@ -3,7 +3,7 @@ import sbt._
 object Deps {
 
   object V {
-    val cats            = "2.7.0"
+    val cats            = "2.8.0"
     val catsParse       = "0.3.7"
     val organizeImports = "0.6.0"
   }
