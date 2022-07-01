@@ -28,3 +28,6 @@ enum Move(val from: Square, val to: Square, val role: Role):
         s"${from.uci}${k.uci}"
       }
       case _ => s"${from.uci}${to.uci}"
+
+
+case class Drop(to: Square, role: Role)

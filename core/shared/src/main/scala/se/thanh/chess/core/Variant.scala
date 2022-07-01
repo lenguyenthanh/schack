@@ -22,12 +22,14 @@ type VariantState[X <: Variant] = X match
 
 trait Pos( val v: Variant, val state: VariantState[v.type])
 
-case class Setup[V <: Variant](board: Board, state: VariantState[V])
+class Setup[V <: Variant](board: Board, state: VariantState[V]):
+  def l: List[Move] = ???
+
 class Setup2(v: Variant, board: Board, state: VariantState[v.type]):
-  def legalMoves: List[Move] =
-    v match
-      case Variant.Standard => Fen(board, state).generate
-      case _ => List()
+  def legalMoves: List[Move] = ???
+    // v match
+    //   case Variant.Standard => Fen(board, state).generate
+    //   case _ => List()
 
 enum Variant:
   case Standard
