@@ -1,10 +1,9 @@
 # draft
 
 A complete Game
-  - A fix Setup
+  - A fix Setup (a starting position)
   - A variant
   - List of Move
-
 
 A Setup
   - Board ( or a position)
@@ -22,8 +21,20 @@ legalMoves: Variant => Setup => List[Move]
 # Variant priority
 
 Std => 960 => crazyhouse
-
 Variant => Game => parser
+
+# Question
+- How can I define chess rule as Value
+  - Is a position valid
+  - End of game condition
+    - Draw
+    - able to claim draw
+    - stalemate
+    - checkmated
+    - Not enough material
+- How can I define variant as Value
+- Variant is a set of rule and all possible positions
+- What is a state
 
 # Variant
 - Name
@@ -43,3 +54,4 @@ Variant => Game => parser
   - Crazyhouse
   - RacingKings
   - Horde
+  - Differentiate between Valid Position and Invalid position
