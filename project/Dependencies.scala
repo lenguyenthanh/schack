@@ -4,7 +4,7 @@ object Deps {
 
   object V {
     val cats            = "2.7.0"
-    val catsParse       = "0.3.8"
+    val catsParse       = "0.3.9"
     val organizeImports = "0.6.0"
   }
 
